@@ -1,5 +1,7 @@
 import chess.*;
+import model.*;
 import server.Server;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,5 +11,8 @@ public class Main {
         // Create and run a server
         Server server = new Server();
         server.run(8080);
+
+
+
     }
 }

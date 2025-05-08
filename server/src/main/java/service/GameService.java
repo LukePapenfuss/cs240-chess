@@ -3,15 +3,15 @@ import service.request.*;
 
 public class GameService {
 
-    public CreateResult create(CreateRequest) {
+    public CreateResult create(CreateRequest createRequest) {
         return null;
     }
 
-    public JoinResult login(JoinRequest loginRequest) {
+    public JoinResult join(JoinRequest loginRequest) {
         return null;
     }
 
-    public ListResult logout(ListRequest listRequest) {
+    public ListResult list(ListRequest listRequest) {
         return null;
     }
 }
