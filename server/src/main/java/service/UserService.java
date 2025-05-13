@@ -15,7 +15,7 @@ public class UserService {
         UserData findUser = userDAO.getUser(registerRequest.username());
 
         if (findUser != null) {
-            throw new DataAccessException("AlreadyTakenException");
+            throw new DataAccessException("Error: username already taken");
         }
 
         UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
