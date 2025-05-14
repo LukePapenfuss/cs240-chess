@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import service.*;
 import service.request.*;
 
+import java.util.ArrayList;
+
 public class Handler {
 
     UserService userService = new UserService();
@@ -26,7 +28,7 @@ public class Handler {
     public String logout(String request) throws DataAccessException {
         var serializer = new Gson();
 
-        LogoutRequest logoutRequest = serializer.fromJson(request, LogoutRequest.class);
+        LogoutRequest logoutRequest = new LogoutRequest(request);
 
         userService.logout(logoutRequest);
 

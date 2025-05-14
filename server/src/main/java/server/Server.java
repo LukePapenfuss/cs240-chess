@@ -48,6 +48,21 @@ public class Server {
             }
         });
 
+        // Logout
+        Spark.delete("/session", (req, res) -> {
+            try {
+                String result = handler.logout(req.headers("Authorization"));
+
+                res.type("application/json");
+                return result;
+            } catch (DataAccessException e) {
+                var serializer = new Gson();
+
+                res.status(403);
+                return serializer.toJson(Map.of("message", e.getMessage()));
+            }
+        });
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 

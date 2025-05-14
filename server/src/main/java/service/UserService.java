@@ -52,6 +52,15 @@ public class UserService {
     }
 
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
-        // Just started with the service classes
+        AuthData authData = authDAO.getAuth(logoutRequest.authToken());
+
+        if (authData == null) {
+            throw new DataAccessException("Error: unauthorized");
+        } else {
+            authDAO.deleteAuth(authData);
+            System.out.println("Logged out!");
+        }
+
+        // No return value
     }
 }
