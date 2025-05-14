@@ -23,22 +23,22 @@ public class Handler {
         return json;
     }
 
-    public String logout(String request) {
+    public String logout(String request) throws DataAccessException {
         var serializer = new Gson();
 
         LogoutRequest logoutRequest = serializer.fromJson(request, LogoutRequest.class);
 
-        new UserService().logout(logoutRequest);
+        userService.logout(logoutRequest);
 
         return "{}";
     }
 
-    public String login(String request) {
+    public String login(String request) throws DataAccessException {
         var serializer = new Gson();
 
         LoginRequest loginRequest = serializer.fromJson(request, LoginRequest.class);
 
-        LoginResult loginResult = new UserService().login(loginRequest);
+        LoginResult loginResult = userService.login(loginRequest);
 
         String json = serializer.toJson(loginResult);
 
@@ -50,7 +50,7 @@ public class Handler {
 
         ListRequest listRequest = serializer.fromJson(request, ListRequest.class);
 
-        ListResult listResult = new GameService().list(listRequest);
+        ListResult listResult = gameService.list(listRequest);
 
         String json = serializer.toJson(listResult);
 
@@ -62,7 +62,7 @@ public class Handler {
 
         JoinRequest joinRequest = serializer.fromJson(request, JoinRequest.class);
 
-        JoinResult joinResult = new GameService().join(joinRequest);
+        JoinResult joinResult = gameService.join(joinRequest);
 
         String json = serializer.toJson(joinResult);
 
@@ -74,7 +74,7 @@ public class Handler {
 
         CreateRequest createRequest = serializer.fromJson(request, CreateRequest.class);
 
-        CreateResult createResult = new GameService().create(createRequest);
+        CreateResult createResult = gameService.create(createRequest);
 
         String json = serializer.toJson(createResult);
 
@@ -84,7 +84,7 @@ public class Handler {
     public String clear() {
         var serializer = new Gson();
 
-        ClearResult clearResult = new ClearService().clear();
+        ClearResult clearResult = clearService.clear();
 
         String json = serializer.toJson(clearResult);
 

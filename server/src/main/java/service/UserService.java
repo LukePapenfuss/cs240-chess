@@ -3,15 +3,15 @@ import dataaccess.*;
 import service.request.*;
 import model.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
 
-    private UserDAO userDAO = new MemoryUserDAO();
-    private AuthDAO authDAO = new MemoryAuthDAO();
+    private MemoryUserDAO userDAO = new MemoryUserDAO();
+    private MemoryAuthDAO authDAO = new MemoryAuthDAO();
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
-
         UserData findUser = userDAO.getUser(registerRequest.username());
 
         if (findUser != null) {
@@ -31,11 +31,27 @@ public class UserService {
         return result;
     }
 
-    public LoginResult login(LoginRequest loginRequest) {
-        return null;
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        UserData findUser = userDAO.getUser(loginRequest.username());
+
+        if (findUser == null) {
+            throw new DataAccessException("Error: username does not exist");
+        }
+
+        if (!Objects.equals(findUser.password(), loginRequest.password())) {
+            throw new DataAccessException("Error: unauthorized");
+        } else {
+            AuthData newAuth = new AuthData(UUID.randomUUID().toString(), loginRequest.username());
+
+            authDAO.createAuth(newAuth);
+
+            LoginResult result = new LoginResult(newAuth.username(), newAuth.authToken());
+
+            return result;
+        }
     }
 
-    public void logout(LogoutRequest logoutRequest) {
+    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         // Just started with the service classes
     }
 }
