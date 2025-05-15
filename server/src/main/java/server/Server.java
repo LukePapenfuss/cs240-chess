@@ -28,7 +28,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -43,7 +43,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -58,7 +58,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -75,7 +75,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -92,7 +92,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -109,7 +109,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -124,7 +124,7 @@ public class Server {
             } catch (DataAccessException e) {
                 var serializer = new Gson();
 
-                res.status(403);
+                res.status(convertErrorMessage(e));
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
@@ -139,5 +139,17 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private int convertErrorMessage(DataAccessException e) {
+        int err = 500;
+
+        switch (e.getMessage()) {
+            case "Error: bad request" -> err = 400;
+            case "Error: unauthorized" -> err = 401;
+            case "Error: already taken" -> err = 403;
+        }
+
+        return err;
     }
 }

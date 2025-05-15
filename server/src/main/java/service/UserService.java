@@ -14,8 +14,12 @@ public class UserService {
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         UserData findUser = userDAO.getUser(registerRequest.username());
 
+        if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         if (findUser != null) {
-            throw new DataAccessException("Error: username already taken");
+            throw new DataAccessException("Error: already taken");
         }
 
         UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
@@ -35,7 +39,7 @@ public class UserService {
         UserData findUser = userDAO.getUser(loginRequest.username());
 
         if (findUser == null) {
-            throw new DataAccessException("Error: username does not exist");
+            throw new DataAccessException("Error: unauthorized");
         }
 
         if (!Objects.equals(findUser.password(), loginRequest.password())) {

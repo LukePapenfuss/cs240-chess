@@ -26,6 +26,10 @@ public class GameService {
     public JoinResult join(String authToken, JoinRequest joinRequest) throws DataAccessException {
         GameData game = gameDAO.getGame(joinRequest.gameID());
 
+        if (authToken == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         if (game == null) {
             throw new DataAccessException("Error: bad request");
         } else {
