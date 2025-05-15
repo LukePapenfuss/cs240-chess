@@ -114,6 +114,21 @@ public class Server {
             }
         });
 
+        // Clear data
+        Spark.delete("/db", (req, res) -> {
+            try {
+                String result = handler.clear();
+
+                res.type("application/json");
+                return result;
+            } catch (DataAccessException e) {
+                var serializer = new Gson();
+
+                res.status(403);
+                return serializer.toJson(Map.of("message", e.getMessage()));
+            }
+        });
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 

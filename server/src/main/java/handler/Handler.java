@@ -91,10 +91,13 @@ public class Handler {
         return json;
     }
 
-    public String clear() {
+    public String clear() throws DataAccessException {
         var serializer = new Gson();
 
-        ClearResult clearResult = clearService.clear();
+        userService.clear();
+        gameService.clear();
+
+        ClearResult clearResult = new ClearResult();
 
         String json = serializer.toJson(clearResult);
 

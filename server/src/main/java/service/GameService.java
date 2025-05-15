@@ -26,9 +26,6 @@ public class GameService {
     public JoinResult join(String authToken, JoinRequest joinRequest) throws DataAccessException {
         GameData game = gameDAO.getGame(joinRequest.gameID());
 
-        // convert authToken to username
-
-
         if (game == null) {
             throw new DataAccessException("Error: bad request");
         } else {
@@ -58,5 +55,9 @@ public class GameService {
         ListResult result = new ListResult(gameDAO.listGames());
 
         return result;
+    }
+
+    public void clear() {
+        gameDAO.clear();
     }
 }

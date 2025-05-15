@@ -43,4 +43,8 @@ public class MemoryGameDAO implements GameDAO {
         }
     }
 
+    public void clear() {
+        games = new ArrayList<>();
+    }
+
 }

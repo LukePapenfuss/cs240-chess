@@ -23,4 +23,8 @@ public class MemoryUserDAO implements UserDAO {
 
         return null;
     }
+
+    public void clear() {
+        users = new ArrayList<>();
+    }
 }

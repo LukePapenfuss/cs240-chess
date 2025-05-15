@@ -44,4 +44,8 @@ public class MemoryAuthDAO implements AuthDAO {
         return null;
     }
 
+    public void clear() {
+        auths = new ArrayList<>();
+    }
+
 }

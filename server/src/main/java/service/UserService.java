@@ -71,4 +71,9 @@ public class UserService {
     public String getUsername(String authToken) throws DataAccessException {
         return authDAO.getUsername(authToken);
     }
+
+    public void clear() {
+        userDAO.clear();
+        authDAO.clear();
+    }
 }
