@@ -47,6 +47,14 @@ public class Handler {
         return json;
     }
 
+    public boolean authorize(String request) throws DataAccessException {
+        if (userService.authorize(request)) {
+            return true;
+        }
+
+        throw new DataAccessException("Error: unauthorized");
+    }
+
     public String list(String request) {
         var serializer = new Gson();
 
