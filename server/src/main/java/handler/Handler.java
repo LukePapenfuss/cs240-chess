@@ -79,7 +79,7 @@ public class Handler {
         return json;
     }
 
-    public String create(String request) {
+    public String create(String request) throws DataAccessException {
         var serializer = new Gson();
 
         CreateRequest createRequest = serializer.fromJson(request, CreateRequest.class);

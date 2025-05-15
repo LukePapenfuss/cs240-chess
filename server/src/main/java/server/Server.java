@@ -66,11 +66,9 @@ public class Server {
         // Create a game
         Spark.post("/game", (req, res) -> {
             try {
-                boolean authorized = handler.authorize(req.headers("Authorization"));
+                handler.authorize(req.headers("Authorization"));
 
-                
-
-                String result = "{}";//handler.create(req.body());
+                String result = handler.create(req.body());
 
                 res.type("application/json");
                 return result;

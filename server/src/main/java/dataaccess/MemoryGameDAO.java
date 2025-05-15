@@ -6,7 +6,11 @@ import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO {
 
-    public void createGame(GameData gameData) throws DataAccessException {}
+    private ArrayList<GameData> games = new ArrayList<>();
+
+    public void createGame(GameData gameData) throws DataAccessException {
+        games.add(gameData);
+    }
 
     public GameData getGame(int gameID) throws DataAccessException { return null; }
 
