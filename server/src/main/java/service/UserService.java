@@ -67,4 +67,8 @@ public class UserService {
     public boolean authorize(String authToken) throws DataAccessException {
         return authDAO.getAuth(authToken) != null;
     }
+
+    public String getUsername(String authToken) throws DataAccessException {
+        return authDAO.getUsername(authToken);
+    }
 }

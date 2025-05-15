@@ -34,4 +34,14 @@ public class MemoryAuthDAO implements AuthDAO {
         }
     }
 
+    public String getUsername(String authToken) throws DataAccessException {
+        for (int i = 0; i < auths.size(); ++i) {
+            if (Objects.equals(auths.get(i).authToken(), authToken)) {
+                return auths.get(i).username();
+            }
+        }
+
+        return null;
+    }
+
 }

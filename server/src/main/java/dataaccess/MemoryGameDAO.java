@@ -13,7 +13,15 @@ public class MemoryGameDAO implements GameDAO {
         games.add(gameData);
     }
 
-    public GameData getGame(int gameID) throws DataAccessException { return null; }
+    public GameData getGame(int gameID) throws DataAccessException {
+        for (int i = 0; i < games.size(); ++i) {
+            if (games.get(i).gameID() == gameID) {
+                return games.get(i);
+            }
+        }
+
+        return null;
+    }
 
     public ArrayList<GameInfo> listGames() throws DataAccessException {
         ArrayList<GameInfo> infos = new ArrayList<>();
@@ -27,6 +35,12 @@ public class MemoryGameDAO implements GameDAO {
         return infos;
     }
 
-    public void updateGame(int gameID, GameData newGameData) throws DataAccessException {}
+    public void updateGame(int gameID, GameData newGameData) throws DataAccessException {
+        for (int i = 0; i < games.size(); ++i) {
+            if (games.get(i).gameID() == gameID) {
+                games.set(i, newGameData);
+            }
+        }
+    }
 
 }

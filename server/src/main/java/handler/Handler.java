@@ -67,12 +67,12 @@ public class Handler {
         return json;
     }
 
-    public String join(String request) {
+    public String join(String authToken, String request) throws DataAccessException {
         var serializer = new Gson();
 
         JoinRequest joinRequest = serializer.fromJson(request, JoinRequest.class);
 
-        JoinResult joinResult = gameService.join(joinRequest);
+        JoinResult joinResult = gameService.join(userService.getUsername(authToken), joinRequest);
 
         String json = serializer.toJson(joinResult);
 

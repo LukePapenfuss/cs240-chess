@@ -5,6 +5,8 @@ import dataaccess.MemoryGameDAO;
 import model.GameData;
 import service.request.*;
 
+import java.util.Objects;
+
 public class GameService {
 
     private MemoryGameDAO gameDAO = new MemoryGameDAO();
@@ -21,8 +23,35 @@ public class GameService {
         return result;
     }
 
-    public JoinResult join(JoinRequest loginRequest) {
-        return null;
+    public JoinResult join(String authToken, JoinRequest joinRequest) throws DataAccessException {
+        GameData game = gameDAO.getGame(joinRequest.gameID());
+
+        // convert authToken to username
+
+
+        if (game == null) {
+            throw new DataAccessException("Error: bad request");
+        } else {
+            if ((Objects.equals(joinRequest.playerColor(), "WHITE") && game.whiteUsername() == null) ||
+                    (Objects.equals(joinRequest.playerColor(), "BLACK") && game.blackUsername() == null)) {
+
+                GameData updatedGame = new GameData(
+                        joinRequest.gameID(),
+                        (joinRequest.playerColor().equals("WHITE") ? authToken : game.whiteUsername()),
+                        (joinRequest.playerColor().equals("BLACK") ? authToken : game.blackUsername()),
+                        game.gameName(),
+                        game.game()
+                );
+
+                gameDAO.updateGame(joinRequest.gameID(), updatedGame);
+
+                JoinResult result = new JoinResult();
+
+                return result;
+            } else {
+                throw new DataAccessException("Error: already taken");
+            }
+        }
     }
 
     public ListResult list(ListRequest listRequest) throws DataAccessException {
