@@ -25,7 +25,9 @@ public class GameService {
         return null;
     }
 
-    public ListResult list(ListRequest listRequest) {
-        return null;
+    public ListResult list(ListRequest listRequest) throws DataAccessException {
+        ListResult result = new ListResult(gameDAO.listGames());
+
+        return result;
     }
 }

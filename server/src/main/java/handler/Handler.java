@@ -55,7 +55,7 @@ public class Handler {
         throw new DataAccessException("Error: unauthorized");
     }
 
-    public String list(String request) {
+    public String list(String request) throws DataAccessException {
         var serializer = new Gson();
 
         ListRequest listRequest = serializer.fromJson(request, ListRequest.class);
