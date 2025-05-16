@@ -36,6 +36,10 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        if (loginRequest.username() == null || loginRequest.password() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         UserData findUser = userDAO.getUser(loginRequest.username());
 
         if (findUser == null) {

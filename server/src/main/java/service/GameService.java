@@ -12,6 +12,10 @@ public class GameService {
     private MemoryGameDAO gameDAO = new MemoryGameDAO();
 
     public CreateResult create(CreateRequest createRequest) throws DataAccessException {
+        if (createRequest.gameName() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         int gameID = (int) Math.floor(Math.random()*100000000);
 
         GameData newGame = new GameData(gameID, null, null, createRequest.gameName(), new ChessGame());
@@ -23,23 +27,23 @@ public class GameService {
         return result;
     }
 
-    public JoinResult join(String authToken, JoinRequest joinRequest) throws DataAccessException {
-        GameData game = gameDAO.getGame(joinRequest.gameID());
-
-        if (authToken == null) {
+    public JoinResult join(String username, JoinRequest joinRequest) throws DataAccessException {
+        if (username == null || joinRequest.playerColor() == null || !(joinRequest.gameID() > 10)) {
             throw new DataAccessException("Error: bad request");
         }
+
+        GameData game = gameDAO.getGame(joinRequest.gameID());
 
         if (game == null) {
             throw new DataAccessException("Error: bad request");
         } else {
-            if ((Objects.equals(joinRequest.playerColor(), "WHITE") && game.whiteUsername() == null) ||
-                    (Objects.equals(joinRequest.playerColor(), "BLACK") && game.blackUsername() == null)) {
+            if ((joinRequest.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) ||
+                    (joinRequest.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() == null)) {
 
                 GameData updatedGame = new GameData(
                         joinRequest.gameID(),
-                        (joinRequest.playerColor().equals("WHITE") ? authToken : game.whiteUsername()),
-                        (joinRequest.playerColor().equals("BLACK") ? authToken : game.blackUsername()),
+                        (joinRequest.playerColor().equals(ChessGame.TeamColor.WHITE) ? username : game.whiteUsername()),
+                        (joinRequest.playerColor().equals(ChessGame.TeamColor.BLACK) ? username : game.blackUsername()),
                         game.gameName(),
                         game.game()
                 );

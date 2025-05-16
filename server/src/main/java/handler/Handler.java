@@ -63,7 +63,7 @@ public class Handler {
         ListResult listResult = gameService.list(listRequest);
 
         String json = serializer.toJson(listResult);
-
+        
         return json;
     }
 
