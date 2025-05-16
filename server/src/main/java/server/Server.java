@@ -16,7 +16,6 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-
         // Run All Endpoints
         registerEndpoint();
 
@@ -115,7 +114,7 @@ public class Server {
             try {
                 handler.authorize(req.headers("Authorization"));
 
-                String result = handler.list(req.body());
+                String result = handler.list(req.headers("Authorization"));
 
                 res.type("application/json");
                 return result;

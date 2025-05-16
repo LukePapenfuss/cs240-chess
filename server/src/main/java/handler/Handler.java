@@ -58,7 +58,7 @@ public class Handler {
     public String list(String request) throws DataAccessException {
         var serializer = new Gson();
 
-        ListRequest listRequest = serializer.fromJson(request, ListRequest.class);
+        ListRequest listRequest = new ListRequest(request);
 
         ListResult listResult = gameService.list(listRequest);
 

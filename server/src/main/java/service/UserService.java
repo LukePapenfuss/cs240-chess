@@ -66,7 +66,6 @@ public class UserService {
             throw new DataAccessException("Error: unauthorized");
         } else {
             authDAO.deleteAuth(authData);
-            System.out.println("Logged out!");
         }
 
         // No return value

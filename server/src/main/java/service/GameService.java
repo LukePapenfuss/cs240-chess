@@ -60,6 +60,10 @@ public class GameService {
     }
 
     public ListResult list(ListRequest listRequest) throws DataAccessException {
+        if (listRequest.authToken() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+
         ListResult result = new ListResult(gameDAO.listGames());
 
         return result;
