@@ -11,7 +11,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive Register Test")
-    public void PositiveRegisterTest() throws DataAccessException {
+    public void positiveRegisterTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", "Doofenschmirz", "inator@evil.com");
@@ -24,7 +24,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Register Test")
-    public void NegativeRegisterTest() {
+    public void negativeRegisterTest() {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", null, "inator@evil.com");
@@ -34,7 +34,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive Login Test")
-    public void PositiveLoginTest() throws DataAccessException {
+    public void positiveLoginTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", "Doofenschmirz", "inator@evil.com");
@@ -51,7 +51,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Login Test")
-    public void NegativeLoginTest() throws DataAccessException {
+    public void negativeLoginTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", "Doofenschmirz", "inator@evil.com");
@@ -65,7 +65,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive Logout Test")
-    public void PositiveLogoutTest() throws DataAccessException {
+    public void positiveLogoutTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", "Doofenschmirz", "inator@evil.com");
@@ -81,7 +81,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Logout Test")
-    public void NegativeLogoutTest() throws DataAccessException {
+    public void negativeLogoutTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", "Doofenschmirz", "inator@evil.com");
@@ -95,7 +95,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive Create Test")
-    public void PositiveCreateTest() throws DataAccessException {
+    public void positiveCreateTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -113,7 +113,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Create Test")
-    public void NegativeCreateTest() throws DataAccessException {
+    public void negativeCreateTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -128,7 +128,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive List Test")
-    public void PositiveListTest() throws DataAccessException {
+    public void positiveListTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -151,7 +151,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative List Test")
-    public void NegativeListTest() throws DataAccessException {
+    public void negativeListTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -170,7 +170,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive Join Test")
-    public void PositiveJoinTest() throws DataAccessException {
+    public void positiveJoinTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -191,7 +191,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Join Test")
-    public void NegativeJoinTest() throws DataAccessException {
+    public void negativeJoinTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
@@ -210,7 +210,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Clear Test")
-    public void ClearTest() throws DataAccessException {
+    public void clearTest() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
