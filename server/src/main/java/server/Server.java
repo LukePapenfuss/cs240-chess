@@ -16,9 +16,35 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints and handle exceptions here.
 
-        // Register a user
+        // Run All Endpoints
+        registerEndpoint();
+
+        loginEndpoint();
+
+        logoutEndpoint();
+
+        createEndpoint();
+
+        listEndpoint();
+
+        joinEndpoint();
+
+        clearEndpoint();
+
+        //This line initializes the server and can be removed once you have a functioning endpoint 
+        Spark.init();
+
+        Spark.awaitInitialization();
+        return Spark.port();
+    }
+
+    public void stop() {
+        Spark.stop();
+        Spark.awaitStop();
+    }
+
+    private void registerEndpoint() {
         Spark.post("/user", (req, res) -> {
             try {
                 String result = handler.register(req.body());
@@ -32,8 +58,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // Login
+    private void loginEndpoint() {
         Spark.post("/session", (req, res) -> {
             try {
                 String result = handler.login(req.body());
@@ -47,8 +74,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // Logout
+    private void logoutEndpoint() {
         Spark.delete("/session", (req, res) -> {
             try {
                 String result = handler.logout(req.headers("Authorization"));
@@ -62,8 +90,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // Create a game
+    private void createEndpoint() {
         Spark.post("/game", (req, res) -> {
             try {
                 handler.authorize(req.headers("Authorization"));
@@ -79,8 +108,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // List all games
+    private void listEndpoint() {
         Spark.get("/game", (req, res) -> {
             try {
                 handler.authorize(req.headers("Authorization"));
@@ -96,8 +126,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // Join Game
+    private void joinEndpoint() {
         Spark.put("/game", (req, res) -> {
             try {
                 handler.authorize(req.headers("Authorization"));
@@ -113,8 +144,9 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
 
-        // Clear data
+    private void clearEndpoint() {
         Spark.delete("/db", (req, res) -> {
             try {
                 String result = handler.clear();
@@ -128,18 +160,8 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
-
-        Spark.awaitInitialization();
-        return Spark.port();
     }
 
-    public void stop() {
-        Spark.stop();
-        Spark.awaitStop();
-    }
 
     private int convertErrorMessage(DataAccessException e) {
         int err = 500;
