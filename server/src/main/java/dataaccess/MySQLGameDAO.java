@@ -66,22 +66,11 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     public void updateGame(int gameID, GameData newGameData) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM game";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        if (Objects.equals(rs.getInt("gameID"), gameID)) {
+        var statement = "UPDATE game SET gameID = ?, whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
 
-                            // Replace the game here
+        var json = new Gson().toJson(newGameData.game(), ChessGame.class);
 
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
-        }
+        executeUpdate(statement, newGameData.gameID(), newGameData.whiteUsername(), newGameData.blackUsername(), newGameData.gameName(), json, gameID);
     }
 
     public void clear() throws DataAccessException {
@@ -121,8 +110,10 @@ public class MySQLGameDAO implements GameDAO {
               `whiteUsername` varchar(256) NOT NULL,
               `blackUsername` varchar(256) NOT NULL,
               `game` TEXT DEFAULT NULL,
-              PRIMARY KEY (username),
-              INDEX(authToken)
+              PRIMARY KEY (gameID),
+              INDEX(gameName),
+              INDEX(whiteUsername),
+              INDEX(blackUsername)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
