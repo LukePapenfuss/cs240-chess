@@ -13,8 +13,10 @@ import static java.sql.Types.NULL;
 
 public class MySQLUserDAO implements UserDAO {
 
+    DataConnector connector = new DataConnector();
+
     public MySQLUserDAO() throws DataAccessException {
-        configureDatabase();
+        connector.configureDatabase(createStatements);
     }
 
     public void createUser(UserData userData) throws DataAccessException {
@@ -22,7 +24,7 @@ public class MySQLUserDAO implements UserDAO {
 
         String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
 
-        var id = executeUpdate(statement, userData.username(), hashedPassword, userData.email());
+        var id = connector.executeUpdate(statement, userData.username(), hashedPassword, userData.email());
     }
 
     public UserData getUser(String username) throws DataAccessException {
@@ -46,31 +48,7 @@ public class MySQLUserDAO implements UserDAO {
 
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE user";
-        executeUpdate(statement);
-    }
-
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                        // else if (param instanceof PetType p) ps.setString(i + 1, p.toString());
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Error: unable to update database: %s, %s", statement, e.getMessage()));
-        }
+        connector.executeUpdate(statement);
     }
 
     private final String[] createStatements = {
@@ -85,18 +63,5 @@ public class MySQLUserDAO implements UserDAO {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Error: Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 
 }
