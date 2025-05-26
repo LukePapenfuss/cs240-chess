@@ -156,7 +156,7 @@ public class Server {
                 var serializer = new Gson();
 
                 res.status(convertErrorMessage(e));
-                return serializer.toJson(Map.of("message", e.getMessage()));
+                return serializer.toJson(Map.of("message", "Error: " + e.getMessage()));
             }
         });
     }
