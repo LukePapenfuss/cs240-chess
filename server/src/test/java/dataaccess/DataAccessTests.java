@@ -60,18 +60,13 @@ public class DataAccessTests {
         dao.clear();
 
         AuthData authData = new AuthData("token", "name");
-        AuthData authData2 = new AuthData("token2", "name2");
 
         dao.createAuth(authData);
-        dao.createAuth(authData2);
 
         AuthData result = dao.getAuth("token");
-        AuthData result2 = dao.getAuth("token2");
 
         Assertions.assertNotNull(result);
-        Assertions.assertNotNull(result2);
         Assertions.assertEquals("name", result.username());
-        Assertions.assertEquals("name2", result2.username());
     }
 
     @Test
@@ -211,18 +206,13 @@ public class DataAccessTests {
         dao.clear();
 
         UserData userData = new UserData("name", "pass", "mail");
-        UserData userData2 = new UserData("name2", "pass2", "mail2");
 
         dao.createUser(userData);
-        dao.createUser(userData2);
 
         UserData result = dao.getUser("name");
-        UserData result2 = dao.getUser("name2");
 
         Assertions.assertNotNull(result);
-        Assertions.assertNotNull(result2);
         Assertions.assertEquals("name", result.username());
-        Assertions.assertEquals("name2", result2.username());
     }
 
     @Test

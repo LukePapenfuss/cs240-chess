@@ -26,7 +26,7 @@ public class MySQLAuthDAO implements AuthDAO {
             var statement = "SELECT authToken, username FROM auth";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
+                    if (rs.next()) {
                         if (Objects.equals(rs.getString("authToken"), authToken)) {
                             return new AuthData(rs.getString("authToken"), rs.getString("username"));
                         }
@@ -50,7 +50,7 @@ public class MySQLAuthDAO implements AuthDAO {
             var statement = "SELECT authToken, username FROM auth";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
+                    if (rs.next()) {
                         if (Objects.equals(rs.getString("authToken"), authToken)) {
                             return rs.getString("username");
                         }

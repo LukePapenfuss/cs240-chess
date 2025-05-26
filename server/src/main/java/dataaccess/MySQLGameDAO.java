@@ -34,9 +34,11 @@ public class MySQLGameDAO implements GameDAO {
             var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM game";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
+                    if (rs.next()) {
                         if (Objects.equals(rs.getInt("gameID"), gameID)) {
-                            return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"), new Gson().fromJson(rs.getString("game"), ChessGame.class));
+                            return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                    rs.getString("blackUsername"), rs.getString("gameName"),
+                                    new Gson().fromJson(rs.getString("game"), ChessGame.class));
                         }
                     }
                 }
@@ -56,7 +58,8 @@ public class MySQLGameDAO implements GameDAO {
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        infos.add(new GameInfo(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName")));
+                        infos.add(new GameInfo(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"), rs.getString("gameName")));
                     }
                 }
             }
@@ -72,7 +75,8 @@ public class MySQLGameDAO implements GameDAO {
 
         var json = new Gson().toJson(newGameData.game(), ChessGame.class);
 
-        connector.executeUpdate(statement, newGameData.gameID(), newGameData.whiteUsername(), newGameData.blackUsername(), newGameData.gameName(), json, gameID);
+        connector.executeUpdate(statement, newGameData.gameID(), newGameData.whiteUsername(), newGameData.blackUsername(),
+                newGameData.gameName(), json, gameID);
     }
 
     public void clear() throws DataAccessException {
