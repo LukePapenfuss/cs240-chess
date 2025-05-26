@@ -10,4 +10,5 @@ public interface AuthDAO {
 
     public void deleteAuth(AuthData authData) throws DataAccessException;
 
+    public void clear() throws DataAccessException;
 }

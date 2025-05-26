@@ -1,5 +1,6 @@
 package service;
 import dataaccess.*;
+import org.mindrot.jbcrypt.BCrypt;
 import service.request.*;
 import model.*;
 
@@ -8,8 +9,25 @@ import java.util.UUID;
 
 public class UserService {
 
-    private MemoryUserDAO userDAO = new MemoryUserDAO();
-    private MemoryAuthDAO authDAO = new MemoryAuthDAO();
+    private UserDAO userDAO;
+
+    {
+        try {
+            userDAO = new MySQLUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private AuthDAO authDAO;
+
+    {
+        try {
+            authDAO = new MySQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         UserData findUser = userDAO.getUser(registerRequest.username());
@@ -46,7 +64,7 @@ public class UserService {
             throw new DataAccessException("Error: unauthorized");
         }
 
-        if (!Objects.equals(findUser.password(), loginRequest.password())) {
+        if (!BCrypt.checkpw(loginRequest.password(), findUser.password())) {
             throw new DataAccessException("Error: unauthorized");
         } else {
             AuthData newAuth = new AuthData(UUID.randomUUID().toString(), loginRequest.username());
@@ -76,10 +94,10 @@ public class UserService {
     }
 
     public String getUsername(String authToken) throws DataAccessException {
-        return authDAO.getUsername(authToken);
+        return authDAO.getAuth(authToken).username();
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
     }

@@ -9,9 +9,13 @@ import java.util.ArrayList;
 
 public class Handler {
 
-    UserService userService = new UserService();
-    GameService gameService = new GameService();
-    ClearService clearService = new ClearService();
+    UserService userService;
+    GameService gameService;
+
+    public Handler() {
+        gameService = new GameService();
+        userService = new UserService();
+    }
 
     public String register(String request) throws DataAccessException {
         var serializer = new Gson();

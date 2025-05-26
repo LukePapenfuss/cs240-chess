@@ -24,7 +24,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative Register Test")
-    public void negativeRegisterTest() {
+    public void negativeRegisterTest() throws DataAccessException {
         UserService userService = new UserService();
 
         RegisterRequest request = new RegisterRequest("Heinz", null, "inator@evil.com");

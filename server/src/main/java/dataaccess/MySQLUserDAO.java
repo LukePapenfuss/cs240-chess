@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,7 +19,10 @@ public class MySQLUserDAO implements UserDAO {
 
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        var id = executeUpdate(statement, userData.username(), userData.password(), userData.email());
+
+        String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
+
+        var id = executeUpdate(statement, userData.username(), hashedPassword, userData.email());
     }
 
     public UserData getUser(String username) throws DataAccessException {

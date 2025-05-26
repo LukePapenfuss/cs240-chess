@@ -1,7 +1,9 @@
 package service;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
 import dataaccess.MemoryGameDAO;
+import dataaccess.MySQLGameDAO;
 import model.GameData;
 import service.request.*;
 
@@ -9,7 +11,15 @@ import java.util.Objects;
 
 public class GameService {
 
-    private MemoryGameDAO gameDAO = new MemoryGameDAO();
+    private GameDAO gameDAO;
+
+    {
+        try {
+            gameDAO = new MySQLGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public CreateResult create(CreateRequest createRequest) throws DataAccessException {
         if (createRequest.gameName() == null) {
@@ -69,7 +79,7 @@ public class GameService {
         return result;
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         gameDAO.clear();
     }
 }
