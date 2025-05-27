@@ -14,7 +14,7 @@ public class ServiceTests {
     private static Server server;
 
     @BeforeEach
-    public void ClearDB() throws DataAccessException {
+    public void clearDB() throws DataAccessException {
         UserService userService = new UserService();
         GameService gameService = new GameService();
 
