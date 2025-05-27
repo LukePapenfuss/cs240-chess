@@ -3,11 +3,24 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
+import passoff.server.TestServerFacade;
+import server.Server;
 import service.request.*;
 
 import javax.xml.crypto.Data;
 
 public class ServiceTests {
+
+    private static Server server;
+
+    @BeforeEach
+    public void ClearDB() throws DataAccessException {
+        UserService userService = new UserService();
+        GameService gameService = new GameService();
+
+        userService.clear();
+        gameService.clear();
+    }
 
     @Test
     @DisplayName("Positive Register Test")
@@ -76,7 +89,7 @@ public class ServiceTests {
 
         userService.logout(logoutRequest);
 
-        Assertions.assertNull(userService.getUsername(result.authToken()));
+        Assertions.assertThrows(DataAccessException.class, () -> userService.getUsername(result.authToken()));
     }
 
     @Test
@@ -230,7 +243,7 @@ public class ServiceTests {
         ListResult listResult = gameService.list(listRequest);
 
         Assertions.assertTrue(listResult.games().isEmpty());
-        Assertions.assertNull(userService.getUsername(registerResult.authToken()));
+        Assertions.assertThrows(DataAccessException.class, () -> userService.getUsername(registerResult.authToken()));
     }
 
 }

@@ -24,15 +24,15 @@ public class MySQLAuthDAO implements AuthDAO {
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT authToken, username FROM auth";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if (Objects.equals(rs.getString("authToken"), authToken)) {
-                            return new AuthData(rs.getString("authToken"), rs.getString("username"));
-                        }
+            var ps = conn.prepareStatement(statement);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (Objects.equals(rs.getString("authToken"), authToken)) {
+                        return new AuthData(rs.getString("authToken"), rs.getString("username"));
                     }
                 }
             }
+
         } catch (Exception e) {
             throw new DataAccessException(String.format("Error: Unable to read data: %s", e.getMessage()));
         }
@@ -48,12 +48,11 @@ public class MySQLAuthDAO implements AuthDAO {
     public String getUsername(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT authToken, username FROM auth";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if (Objects.equals(rs.getString("authToken"), authToken)) {
-                            return rs.getString("username");
-                        }
+            var ps = conn.prepareStatement(statement);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (Objects.equals(rs.getString("authToken"), authToken)) {
+                        return rs.getString("username");
                     }
                 }
             }

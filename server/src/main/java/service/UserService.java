@@ -94,6 +94,10 @@ public class UserService {
     }
 
     public String getUsername(String authToken) throws DataAccessException {
+        if (authToken == null || authDAO.getAuth(authToken) == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+
         return authDAO.getAuth(authToken).username();
     }
 

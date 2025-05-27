@@ -30,12 +30,11 @@ public class MySQLUserDAO implements UserDAO {
     public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM user";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if (Objects.equals(rs.getString("username"), username)) {
-                            return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
-                        }
+            var ps = conn.prepareStatement(statement);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (Objects.equals(rs.getString("username"), username)) {
+                        return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
                     }
                 }
             }

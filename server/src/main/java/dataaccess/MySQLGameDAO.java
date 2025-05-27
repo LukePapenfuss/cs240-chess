@@ -32,14 +32,13 @@ public class MySQLGameDAO implements GameDAO {
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM game";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if (Objects.equals(rs.getInt("gameID"), gameID)) {
-                            return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
-                                    rs.getString("blackUsername"), rs.getString("gameName"),
-                                    new Gson().fromJson(rs.getString("game"), ChessGame.class));
-                        }
+            var ps = conn.prepareStatement(statement);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (Objects.equals(rs.getInt("gameID"), gameID)) {
+                        return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"), rs.getString("gameName"),
+                                new Gson().fromJson(rs.getString("game"), ChessGame.class));
                     }
                 }
             }
