@@ -2,6 +2,7 @@ package client;
 
 import java.util.Arrays;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 import model.GameData;
@@ -150,7 +151,24 @@ public class Client {
     }
 
     public String join(String... params) throws ResponseException {
-        return "join";
+        ChessGame.TeamColor color = params[1].equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        int gameInt = Integer.parseInt(params[0]);
+
+        ListRequest listRequest = new ListRequest(visitorAuth);
+
+        try {
+            ListResult listResult = server.list(visitorAuth, listRequest);
+
+            int gameID = listResult.games().get(gameInt-1).gameID();
+
+            JoinRequest request = new JoinRequest(color, gameID);
+
+            JoinResult result = server.join(visitorAuth, request);
+
+            return "Succesfully joined game as " + color.toString() + ".";
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not join game.");
+        }
     }
 
     public String observe(String... params) throws ResponseException {
