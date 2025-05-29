@@ -35,7 +35,29 @@ public class Client {
         }
     }
 
-    public String register(String... params) throws ResponseException { return "This is the register."; }
+    public String register(String... params) throws ResponseException {
+        if (params.length == 3) {
+            String username = params[0];
+            String password = params[1];
+            String email = params[2];
+
+            RegisterRequest request = new RegisterRequest(username, password, email);
+
+            try {
+                RegisterResult result = server.register(request);
+
+                state = State.SIGNEDIN;
+
+                return String.format("You are now registered and logged in as %s.", result.username());
+
+            } catch (ResponseException e) {
+                throw new ResponseException("Invalid Credentials");
+            }
+
+        } else {
+            throw new ResponseException("Expected: register <username> <password> <email>");
+        }
+    }
 
     public String login(String... params) throws ResponseException {
         if (params.length == 2) {
@@ -52,7 +74,7 @@ public class Client {
                 return String.format("You are signed in as %s.", result.username());
 
             } catch (ResponseException e) {
-                throw new RuntimeException("Invalid Credentials");
+                throw new ResponseException("Invalid Credentials");
             }
 
         } else {
@@ -60,8 +82,28 @@ public class Client {
         }
     }
 
-    public String quit() throws ResponseException { return "This is the quit."; }
+    public String quit() throws ResponseException { return "quit"; }
 
-    public String help() { return "This is the help."; }
+    public String help() {
+        if (state == State.SIGNEDOUT) {
+            return """
+                    - help
+                    - register <username> <password> <email>
+                    - login <username> <password>
+                    - quit
+                    """;
+        }
+        return """
+                - help
+                - logout
+                - create <name>
+                - list
+                - join <id> [WHITE|BLACK]
+                - observe <id>
+                - quit
+                """;
+    }
+
+    public String getState() { return state.toString(); }
 
 }
