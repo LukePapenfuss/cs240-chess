@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import handler.*;
+import service.request.*;
 import spark.*;
 
 import java.util.Map;
@@ -94,6 +95,8 @@ public class Server {
     private void createEndpoint() {
         Spark.post("/game", (req, res) -> {
             try {
+                var serializer = new Gson();
+
                 handler.authorize(req.headers("Authorization"));
 
                 String result = handler.create(req.body());

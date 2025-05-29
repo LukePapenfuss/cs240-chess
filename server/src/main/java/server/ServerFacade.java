@@ -20,45 +20,49 @@ public class ServerFacade {
 
     public RegisterResult register(RegisterRequest request) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, request, RegisterResult.class);
+        return this.makeRequest("POST", path, request, RegisterResult.class, null);
     }
 
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("POST", path, loginRequest, LoginResult.class);
+        return this.makeRequest("POST", path, loginRequest, LoginResult.class, null);
     }
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, logoutRequest, null);
+        this.makeRequest("DELETE", path, logoutRequest, null, null);
     }
 
-    public CreateResult create(CreateRequest createRequest) throws ResponseException {
+    public CreateResult create(String authToken, CreateRequest createRequest) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("POST", path, createRequest, CreateResult.class);
+        return this.makeRequest("POST", path, createRequest, CreateResult.class, authToken);
     }
 
     public JoinResult join(String username, JoinRequest joinRequest) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("PUT", path, joinRequest, JoinResult.class);
+        return this.makeRequest("PUT", path, joinRequest, JoinResult.class, null);
     }
 
     public ListResult list(ListRequest listRequest) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, listRequest, ListResult.class);
+        return this.makeRequest("GET", path, listRequest, ListResult.class, null);
     }
 
     public ClearResult clear() throws ResponseException {
         var path = "/db";
-        return this.makeRequest("DELETE", path, null, ClearResult.class);
+        return this.makeRequest("DELETE", path, null, ClearResult.class, null);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            if (authToken != null && !authToken.isEmpty()) {
+                http.setRequestProperty("Authorization", "Bearer " + authToken);
+            }
 
             writeBody(request, http);
             http.connect();

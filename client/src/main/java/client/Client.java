@@ -9,7 +9,7 @@ import service.request.*;
 
 public class Client {
 
-    private String visitorName = null;
+    private String visitorAuth = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
@@ -24,16 +24,31 @@ public class Client {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "register" -> register(params);
-                case "login" -> login(params);
-                case "quit" -> quit();
-                default -> help();
-            };
+
+            if (state == State.SIGNEDOUT) {
+                return switch (cmd) {
+                    case "register" -> register(params);
+                    case "login" -> login(params);
+                    case "quit" -> quit();
+                    default -> help();
+                };
+            } else {
+                return switch (cmd) {
+                    case "create" -> create(params);
+                    case "list" -> list();
+                    case "join" -> join(params);
+                    case "observe" -> observe(params);
+                    case "logout" -> logout();
+                    case "quit" -> quit();
+                    default -> help();
+                };
+            }
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
     }
+
+    // LOGGED OUT COMMANDS
 
     public String register(String... params) throws ResponseException {
         if (params.length == 3) {
@@ -47,6 +62,8 @@ public class Client {
                 RegisterResult result = server.register(request);
 
                 state = State.SIGNEDIN;
+
+                visitorAuth = result.authToken();
 
                 return String.format("You are now registered and logged in as %s.", result.username());
 
@@ -71,7 +88,9 @@ public class Client {
 
                 state = State.SIGNEDIN;
 
-                return String.format("You are signed in as %s.", result.username());
+                visitorAuth = result.authToken();
+
+                return String.format("You are logged in as %s.", result.username());
 
             } catch (ResponseException e) {
                 throw new ResponseException("Invalid Credentials");
@@ -81,6 +100,46 @@ public class Client {
             throw new ResponseException("Expected: login <username> <password>");
         }
     }
+
+    // LOGGED IN COMMANDS
+
+    public String create(String... params) throws ResponseException {
+        if (params.length == 1) {
+            String gameName = params[0];
+
+            CreateRequest request = new CreateRequest(gameName);
+
+            try {
+                CreateResult result = server.create(visitorAuth, request);
+
+                return String.format("Chess match with ID [%s] was created.", result.gameID());
+
+            } catch (ResponseException e) {
+                throw new ResponseException("Could not create the game.");
+            }
+
+        } else {
+            throw new ResponseException("Expected: create <name>");
+        }
+    }
+
+    public String list() throws ResponseException {
+        return "list";
+    }
+
+    public String join(String... params) throws ResponseException {
+        return "join";
+    }
+
+    public String observe(String... params) throws ResponseException {
+        return "observe";
+    }
+
+    public String logout() throws ResponseException {
+        return "logout";
+    }
+
+    // SHARED COMMANDS
 
     public String quit() throws ResponseException { return "quit"; }
 
