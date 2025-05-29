@@ -61,7 +61,7 @@ public class ServerFacade {
             http.setDoOutput(true);
 
             if (authToken != null && !authToken.isEmpty()) {
-                http.setRequestProperty("Authorization", "Bearer " + authToken);
+                http.setRequestProperty("Authorization", authToken);
             }
 
             writeBody(request, http);
