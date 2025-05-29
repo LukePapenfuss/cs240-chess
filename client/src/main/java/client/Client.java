@@ -13,6 +13,7 @@ public class Client {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
+    private int currentGameID = 0;
 
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -32,13 +33,20 @@ public class Client {
                     case "quit" -> quit();
                     default -> help();
                 };
-            } else {
+            } else if (state == State.LOGGEDIN) {
                 return switch (cmd) {
                     case "create" -> create(params);
                     case "list" -> list();
                     case "join" -> join(params);
                     case "observe" -> observe(params);
                     case "logout" -> logout();
+                    case "quit" -> quit();
+                    default -> help();
+                };
+            } else {
+                // In game commands (Playing and Observing)
+                return switch (cmd) {
+                    case "exit" -> exit();
                     case "quit" -> quit();
                     default -> help();
                 };
@@ -133,15 +141,15 @@ public class Client {
                 return "No games found.";
             }
 
-            String str = "";
+            StringBuilder str = new StringBuilder();
 
             for (int i = 0; i < result.games().size(); ++i) {
                 GameInfo game = result.games().get(i);
 
-                str += (i+1) + ". Game name: " + game.gameName() + "\tWhite: " + game.whiteUsername() + "\tBlack: " + game.blackUsername() + "\n";
+                str.append((i + 1)).append(". Game name: ").append(game.gameName()).append("\tWhite: ").append(game.whiteUsername()).append("\tBlack: ").append(game.blackUsername()).append("\n");
             }
 
-            return str;
+            return str.toString();
         } catch (ResponseException e) {
             throw new ResponseException("Could not list all games.");
         }
@@ -163,6 +171,9 @@ public class Client {
 
             JoinResult result = server.join(visitorAuth, request);
 
+            state = State.INGAME;
+            currentGameID = gameID;
+
             return "Succesfully joined game as " + color.toString() + ".";
         } catch (ResponseException e) {
             throw new ResponseException("Could not join game.");
@@ -170,7 +181,22 @@ public class Client {
     }
 
     public String observe(String... params) throws ResponseException {
-        return "observe";
+        int gameInt = Integer.parseInt(params[0]);
+
+        ListRequest listRequest = new ListRequest(visitorAuth);
+
+        try {
+            ListResult listResult = server.list(visitorAuth, listRequest);
+
+            int gameID = listResult.games().get(gameInt-1).gameID();
+
+            state = State.INGAME;
+            currentGameID = gameID;
+
+            return "Succesfully observing the game.";
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not join game.");
+        }
     }
 
     public String logout() throws ResponseException {
@@ -190,6 +216,14 @@ public class Client {
 
     }
 
+    // IN GAME COMMANDS
+
+    public String exit() throws ResponseException {
+        state = State.LOGGEDIN;
+
+        return "Exited game.";
+    }
+
     // SHARED COMMANDS
 
     public String quit() throws ResponseException { return "quit"; }
@@ -202,16 +236,22 @@ public class Client {
                     - login <username> <password>
                     - quit
                     """;
+        } else if (state == State.LOGGEDIN) {
+            return """
+                    - help
+                    - logout
+                    - create <name>
+                    - list
+                    - join <id> [WHITE|BLACK]
+                    - observe <id>
+                    - quit
+                    """;
         }
         return """
-                - help
-                - logout
-                - create <name>
-                - list
-                - join <id> [WHITE|BLACK]
-                - observe <id>
-                - quit
-                """;
+                    - help
+                    - exit (the game)
+                    - quit (the program)
+                    """;
     }
 
     public String getState() { return state.toString(); }
