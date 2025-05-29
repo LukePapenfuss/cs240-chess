@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import chess.ChessGame;
 
+import chess.ChessPosition;
+import model.GameData;
 import server.ServerFacade;
 import service.request.*;
 
@@ -13,7 +15,7 @@ public class Client {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
-    private int currentGameID = 0;
+    private int currentGameIndex = 0;
 
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -144,7 +146,7 @@ public class Client {
             StringBuilder str = new StringBuilder();
 
             for (int i = 0; i < result.games().size(); ++i) {
-                GameInfo game = result.games().get(i);
+                GameData game = result.games().get(i);
 
                 str.append((i + 1)).append(". Game name: ").append(game.gameName()).append("\tWhite: ").append(game.whiteUsername()).append("\tBlack: ").append(game.blackUsername()).append("\n");
             }
@@ -172,9 +174,9 @@ public class Client {
             JoinResult result = server.join(visitorAuth, request);
 
             state = State.INGAME;
-            currentGameID = gameID;
+            currentGameIndex = gameInt;
 
-            return "Succesfully joined game as " + color.toString() + ".";
+            return printGame(gameInt, true);
         } catch (ResponseException e) {
             throw new ResponseException("Could not join game.");
         }
@@ -183,19 +185,10 @@ public class Client {
     public String observe(String... params) throws ResponseException {
         int gameInt = Integer.parseInt(params[0]);
 
-        ListRequest listRequest = new ListRequest(visitorAuth);
-
         try {
-            ListResult listResult = server.list(visitorAuth, listRequest);
-
-            int gameID = listResult.games().get(gameInt-1).gameID();
-
-            state = State.INGAME;
-            currentGameID = gameID;
-
-            return "Succesfully observing the game.";
+            return printGame(gameInt, true);
         } catch (ResponseException e) {
-            throw new ResponseException("Could not join game.");
+            throw new ResponseException("Could not observe game.");
         }
     }
 
@@ -255,5 +248,35 @@ public class Client {
     }
 
     public String getState() { return state.toString(); }
+
+    // OTHER METHODS
+
+    private String printGame(int gameIndex, boolean playAsWhite) throws ResponseException {
+        ListRequest listRequest = new ListRequest(visitorAuth);
+
+        try {
+            ListResult listResult = server.list(visitorAuth, listRequest);
+
+            ChessGame game = listResult.games().get(gameIndex-1).game();
+
+            String str = "\u2003 \u2003\u2003a\u2003\u2003b\u2003\u2003c\u2003\u2003d\u2003\u2003e\u2003\u2003f\u2003\u2003g\u2003\u2003h\u2003\n";
+
+            for (int i = 0; i < 8; ++i) {
+                str += "\u2003" + (8-i) + "\u2003";
+                for (int j = 0; j < 8; ++j) {
+                    str += "\u2003";
+                    if(game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)) != null) {
+                        str += game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).toString();
+                    } else { str += " "; }
+                    str += "\u2003";
+                }
+                str += "\n";
+            }
+
+            return str;
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not join game.");
+        }
+    }
 
 }

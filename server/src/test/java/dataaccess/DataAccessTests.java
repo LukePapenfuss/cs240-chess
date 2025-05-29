@@ -358,7 +358,7 @@ public class DataAccessTests {
         dao.createGame(gameData);
         dao.createGame(gameData2);
 
-        ArrayList<GameInfo> list = dao.listGames();
+        ArrayList<GameData> list = dao.listGames();
 
         Assertions.assertNotNull(list);
         Assertions.assertEquals(2, list.size());
@@ -381,7 +381,7 @@ public class DataAccessTests {
 
         dao.clear();
 
-        ArrayList<GameInfo> list = dao.listGames();
+        ArrayList<GameData> list = dao.listGames();
 
         Assertions.assertNotNull(list);
         Assertions.assertTrue(list.isEmpty());

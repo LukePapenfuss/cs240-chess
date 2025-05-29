@@ -49,16 +49,17 @@ public class MySQLGameDAO implements GameDAO {
         return null;
     }
 
-    public ArrayList<GameInfo> listGames() throws DataAccessException {
-        ArrayList<GameInfo> infos = new ArrayList<>();
+    public ArrayList<GameData> listGames() throws DataAccessException {
+        ArrayList<GameData> infos = new ArrayList<>();
 
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, gameName, whiteUsername, blackUsername, game FROM game";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        infos.add(new GameInfo(rs.getInt("gameID"), rs.getString("whiteUsername"),
-                                rs.getString("blackUsername"), rs.getString("gameName")));
+                        infos.add(new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"), rs.getString("gameName"),
+                                new Gson().fromJson(rs.getString("game"), ChessGame.class)));
                     }
                 }
             }

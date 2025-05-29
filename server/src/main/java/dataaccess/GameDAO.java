@@ -10,7 +10,7 @@ public interface GameDAO {
 
     public GameData getGame(int gameID) throws DataAccessException;
 
-    public ArrayList<GameInfo> listGames() throws DataAccessException;
+    public ArrayList<GameData> listGames() throws DataAccessException;
 
     public void updateGame(int gameID, GameData newGameData) throws DataAccessException;
 

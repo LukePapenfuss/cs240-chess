@@ -23,16 +23,8 @@ public class MemoryGameDAO implements GameDAO {
         return null;
     }
 
-    public ArrayList<GameInfo> listGames() throws DataAccessException {
-        ArrayList<GameInfo> infos = new ArrayList<>();
-
-        for (int i = 0; i < games.size(); ++i) {
-            GameData game = games.get(i);
-
-            infos.add(new GameInfo(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
-        }
-
-        return infos;
+    public ArrayList<GameData> listGames() throws DataAccessException {
+        return games;
     }
 
     public void updateGame(int gameID, GameData newGameData) throws DataAccessException {
