@@ -30,7 +30,7 @@ public class ServerFacade {
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, logoutRequest, null, null);
+        this.makeRequest("DELETE", path, logoutRequest, null, logoutRequest.authToken());
     }
 
     public CreateResult create(String authToken, CreateRequest createRequest) throws ResponseException {

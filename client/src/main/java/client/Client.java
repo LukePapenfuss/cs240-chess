@@ -3,9 +3,7 @@ package client;
 import java.util.Arrays;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 
-import model.GameData;
 import server.ServerFacade;
 import service.request.*;
 
@@ -14,7 +12,7 @@ public class Client {
     private String visitorAuth = null;
     private final ServerFacade server;
     private final String serverUrl;
-    private State state = State.SIGNEDOUT;
+    private State state = State.LOGGEDOUT;
 
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -27,7 +25,7 @@ public class Client {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
-            if (state == State.SIGNEDOUT) {
+            if (state == State.LOGGEDOUT) {
                 return switch (cmd) {
                     case "register" -> register(params);
                     case "login" -> login(params);
@@ -63,7 +61,7 @@ public class Client {
             try {
                 RegisterResult result = server.register(request);
 
-                state = State.SIGNEDIN;
+                state = State.LOGGEDIN;
 
                 visitorAuth = result.authToken();
 
@@ -88,7 +86,7 @@ public class Client {
             try {
                 LoginResult result = server.login(loginRequest);
 
-                state = State.SIGNEDIN;
+                state = State.LOGGEDIN;
 
                 visitorAuth = result.authToken();
 
@@ -176,7 +174,20 @@ public class Client {
     }
 
     public String logout() throws ResponseException {
-        return "logout";
+        try {
+            LogoutRequest request = new LogoutRequest(visitorAuth);
+
+            server.logout(request);
+
+            visitorAuth = null;
+
+            state = State.LOGGEDOUT;
+
+            return "Logged out successfully.";
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not log out.");
+        }
+
     }
 
     // SHARED COMMANDS
@@ -184,7 +195,7 @@ public class Client {
     public String quit() throws ResponseException { return "quit"; }
 
     public String help() {
-        if (state == State.SIGNEDOUT) {
+        if (state == State.LOGGEDOUT) {
             return """
                     - help
                     - register <username> <password> <email>
