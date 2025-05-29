@@ -95,8 +95,6 @@ public class Server {
     private void createEndpoint() {
         Spark.post("/game", (req, res) -> {
             try {
-                var serializer = new Gson();
-
                 handler.authorize(req.headers("Authorization"));
 
                 String result = handler.create(req.body());
@@ -115,6 +113,7 @@ public class Server {
     private void listEndpoint() {
         Spark.get("/game", (req, res) -> {
             try {
+                System.out.println("AUTH: " + req.headers("Authorization"));
                 handler.authorize(req.headers("Authorization"));
 
                 String result = handler.list(req.headers("Authorization"));

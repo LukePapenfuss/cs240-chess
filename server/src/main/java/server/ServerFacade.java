@@ -43,9 +43,9 @@ public class ServerFacade {
         return this.makeRequest("PUT", path, joinRequest, JoinResult.class, null);
     }
 
-    public ListResult list(ListRequest listRequest) throws ResponseException {
+    public ListResult list(String authToken, ListRequest listRequest) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, listRequest, ListResult.class, null);
+        return this.makeRequest("GET", path, null, ListResult.class, authToken);
     }
 
     public ClearResult clear() throws ResponseException {
@@ -60,7 +60,7 @@ public class ServerFacade {
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
-            if (authToken != null && !authToken.isEmpty()) {
+            if (authToken != null) {
                 http.setRequestProperty("Authorization", authToken);
             }
 

@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.google.gson.Gson;
 
+import model.GameData;
 import server.ServerFacade;
 import service.request.*;
 
@@ -124,7 +125,28 @@ public class Client {
     }
 
     public String list() throws ResponseException {
-        return "list";
+        ListRequest request = new ListRequest(visitorAuth);
+
+        try {
+            ListResult result = server.list(visitorAuth, request);
+
+            if (result.games().isEmpty()) {
+                return "No games found.";
+            }
+
+            String str = "";
+
+            for (int i = 0; i < result.games().size(); ++i) {
+                GameInfo game = result.games().get(i);
+
+                str += (i+1) + ". Game name: " + game.gameName() + "\tWhite: " + game.whiteUsername() + "\tBlack: " + game.blackUsername() + "\n";
+            }
+
+            return str;
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not list all games.");
+        }
+
     }
 
     public String join(String... params) throws ResponseException {
