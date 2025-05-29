@@ -1,5 +1,6 @@
 package server;
 
+import client.ResponseException;
 import com.google.gson.Gson;
 
 import dataaccess.DataAccessException;
@@ -17,44 +18,42 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public RegisterResult register(RegisterRequest request) throws DataAccessException {
+    public RegisterResult register(RegisterRequest request) throws ResponseException {
         var path = "/user";
         return this.makeRequest("POST", path, request, RegisterResult.class);
     }
 
-    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         var path = "/session";
         return this.makeRequest("POST", path, loginRequest, LoginResult.class);
     }
 
-    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
+    public void logout(LogoutRequest logoutRequest) throws ResponseException {
         var path = "/session";
         this.makeRequest("DELETE", path, logoutRequest, null);
     }
 
-    public CreateResult create(CreateRequest createRequest) throws DataAccessException {
+    public CreateResult create(CreateRequest createRequest) throws ResponseException {
         var path = "/game";
         return this.makeRequest("POST", path, createRequest, CreateResult.class);
     }
 
-    public JoinResult join(String username, JoinRequest joinRequest) throws DataAccessException {
+    public JoinResult join(String username, JoinRequest joinRequest) throws ResponseException {
         var path = "/game";
         return this.makeRequest("PUT", path, joinRequest, JoinResult.class);
     }
 
-    public ListResult list(ListRequest listRequest) throws DataAccessException {
+    public ListResult list(ListRequest listRequest) throws ResponseException {
         var path = "/game";
         return this.makeRequest("GET", path, listRequest, ListResult.class);
     }
 
-    public ClearResult clear() throws DataAccessException {
+    public ClearResult clear() throws ResponseException {
         var path = "/db";
         return this.makeRequest("DELETE", path, null, ClearResult.class);
     }
 
-    // ...
-
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws DataAccessException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -66,7 +65,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
-            throw new DataAccessException(ex.getMessage());
+            throw new ResponseException(ex.getMessage());
         }
     }
 
@@ -80,16 +79,16 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, DataAccessException {
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
             try (InputStream respErr = http.getErrorStream()) {
                 if (respErr != null) {
-                    throw new DataAccessException(respErr.toString());
+                    throw new ResponseException(respErr.toString());
                 }
             }
 
-            throw new DataAccessException("other failure: " + status);
+            throw new ResponseException("other failure: " + status);
         }
     }
 
