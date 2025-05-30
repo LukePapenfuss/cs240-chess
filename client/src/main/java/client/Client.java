@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import chess.ChessGame;
 
+import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
 import server.ServerFacade;
@@ -176,7 +177,7 @@ public class Client {
             state = State.INGAME;
             currentGameIndex = gameInt;
 
-            return printGame(gameInt, true);
+            return printGame(gameInt, color == ChessGame.TeamColor.WHITE);
         } catch (ResponseException e) {
             throw new ResponseException("Could not join game.");
         }
@@ -265,28 +266,32 @@ public class Client {
 
             ChessGame game = listResult.games().get(gameIndex-1).game();
 
-            String str = defaultColor + " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n";
+            String str = defaultColor + (playAsWhite ? " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n" :
+                    " \u2003 \u2003h \u2003g \u2003f \u2003e \u2003d \u2003c \u2003b \u2003a  \n");
 
             for (int i = 0; i < 8; ++i) {
-                str += defaultColor + "\u2003" + (8-i) + " ";
+                str += defaultColor + "\u2003" + (playAsWhite ? 8 - i : i + 1) + " ";
                 for (int j = 0; j < 8; ++j) {
 
-                    if (game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)) != null && game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    ChessPiece piece = game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j));
+
+                    if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         str += ((i + j) % 2 == 0) ? whiteOnLight : whiteOnDark;
                     } else {
                         str += ((i + j) % 2 == 0) ? blackOnLight : blackOnDark;
                     }
 
                     str += " ";
-                    if(game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)) != null) {
-                        str += game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).toSymbol();
+                    if(piece != null) {
+                        str += piece.toSymbol();
                     } else { str += "\u2003"; }
                     str += " ";
                 }
-                str += defaultColor + "\u2003" + (8 - i) + " \n";
+                str += defaultColor + "\u2003" + (playAsWhite ? 8 - i : i + 1) + " \n";
             }
 
-            str += defaultColor + " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n";
+            str += defaultColor + (playAsWhite ? " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n" :
+                    " \u2003 \u2003h \u2003g \u2003f \u2003e \u2003d \u2003c \u2003b \u2003a  \n");
 
             return str;
         } catch (ResponseException e) {
