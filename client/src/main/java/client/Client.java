@@ -257,21 +257,36 @@ public class Client {
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
 
+            String defaultColor = "\u001b[39;49m";
+            String whiteOnDark = "\u001b[39;47m";
+            String whiteOnLight = "\u001b[39;100m";
+            String blackOnDark = "\u001b[30;47m";
+            String blackOnLight = "\u001b[30;100m";
+
             ChessGame game = listResult.games().get(gameIndex-1).game();
 
-            String str = "\u2003 \u2003\u2003a\u2003\u2003b\u2003\u2003c\u2003\u2003d\u2003\u2003e\u2003\u2003f\u2003\u2003g\u2003\u2003h\u2003\n";
+            String str = defaultColor + " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n";
 
             for (int i = 0; i < 8; ++i) {
-                str += "\u2003" + (8-i) + "\u2003";
+                str += defaultColor + "\u2003" + (8-i) + " ";
                 for (int j = 0; j < 8; ++j) {
-                    str += "\u2003";
+
+                    if (game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)) != null && game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        str += ((i + j) % 2 == 0) ? whiteOnLight : whiteOnDark;
+                    } else {
+                        str += ((i + j) % 2 == 0) ? blackOnLight : blackOnDark;
+                    }
+
+                    str += " ";
                     if(game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)) != null) {
-                        str += game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).toString();
-                    } else { str += " "; }
-                    str += "\u2003";
+                        str += game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, j+1)).toSymbol();
+                    } else { str += "\u2003"; }
+                    str += " ";
                 }
-                str += "\n";
+                str += defaultColor + "\u2003" + (8 - i) + " \n";
             }
+
+            str += defaultColor + " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n";
 
             return str;
         } catch (ResponseException e) {

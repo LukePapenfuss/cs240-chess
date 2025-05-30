@@ -102,6 +102,21 @@ public class ChessPiece {
         return pieceStr;
     }
 
+    public String toSymbol() {
+        String pieceStr = " ";
+
+        switch (getPieceType()) {
+            case KING -> pieceStr = "\u265A";
+            case QUEEN -> pieceStr = "\u265B";
+            case ROOK -> pieceStr = "\u265C";
+            case BISHOP -> pieceStr = "\u265d";
+            case KNIGHT -> pieceStr = "\u265e";
+            case PAWN -> pieceStr = "\u265f";
+        }
+
+        return pieceStr;
+    }
+
     /**
      * Mark the piece as having been moved from start
      */
