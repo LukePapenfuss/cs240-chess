@@ -123,7 +123,7 @@ public class Client {
             try {
                 CreateResult result = server.create(visitorAuth, request);
 
-                return String.format("Chess match with ID [%s] was created.", result.gameID());
+                return String.format("Chess match named %s was created", gameName);
 
             } catch (ResponseException e) {
                 throw new ResponseException("Could not create the game.");
@@ -160,6 +160,16 @@ public class Client {
     }
 
     public String join(String... params) throws ResponseException {
+        try {
+            Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException("Please enter an integer value.");
+        }
+
+        if (!params[1].equalsIgnoreCase("white") && !params[1].equalsIgnoreCase("black")) {
+            throw new ResponseException("Please choose team white or team black.");
+        }
+
         ChessGame.TeamColor color = params[1].equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         int gameInt = Integer.parseInt(params[0]);
 
@@ -167,6 +177,10 @@ public class Client {
 
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
+
+            if (gameInt > listResult.games().size()) {
+                throw new ResponseException("");
+            }
 
             int gameID = listResult.games().get(gameInt-1).gameID();
 
@@ -184,6 +198,12 @@ public class Client {
     }
 
     public String observe(String... params) throws ResponseException {
+        try {
+            Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException("Please enter an integer value.");
+        }
+
         int gameInt = Integer.parseInt(params[0]);
 
         try {
@@ -220,7 +240,7 @@ public class Client {
 
     // SHARED COMMANDS
 
-    public String quit() throws ResponseException { return "quit"; }
+    public String quit() throws ResponseException { return "Quitting..."; }
 
     public String help() {
         if (state == State.LOGGEDOUT) {
@@ -258,6 +278,10 @@ public class Client {
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
 
+            if (gameIndex > listResult.games().size()) {
+                throw new ResponseException("");
+            }
+
             String defaultColor = "\u001b[39;49m";
             String whiteOnDark = "\u001b[39;47m";
             String whiteOnLight = "\u001b[39;100m";
@@ -276,9 +300,9 @@ public class Client {
                     ChessPiece piece = game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j));
 
                     if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        str += ((i + j) % 2 == 0) ? whiteOnLight : whiteOnDark;
+                        str += ((i + j) % 2 == 0) ? whiteOnDark : whiteOnLight;
                     } else {
-                        str += ((i + j) % 2 == 0) ? blackOnLight : blackOnDark;
+                        str += ((i + j) % 2 == 0) ? blackOnDark : blackOnLight;
                     }
 
                     str += " ";
@@ -295,7 +319,7 @@ public class Client {
 
             return str;
         } catch (ResponseException e) {
-            throw new ResponseException("Could not join game.");
+            throw new ResponseException("Could not display game.");
         }
     }
 
