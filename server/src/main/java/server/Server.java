@@ -113,7 +113,6 @@ public class Server {
     private void listEndpoint() {
         Spark.get("/game", (req, res) -> {
             try {
-                System.out.println("AUTH: " + req.headers("Authorization"));
                 handler.authorize(req.headers("Authorization"));
 
                 String result = handler.list(req.headers("Authorization"));
