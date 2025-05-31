@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import handler.*;
-import service.request.*;
 import spark.*;
 
 import java.util.Map;
