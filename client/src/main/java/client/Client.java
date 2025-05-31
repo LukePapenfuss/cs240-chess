@@ -7,7 +7,6 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
-import server.ServerFacade;
 import service.request.*;
 
 public class Client {
