@@ -1,15 +1,11 @@
 package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import service.UserService;
-import service.request.*;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 public class DataAccessTests {

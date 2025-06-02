@@ -1,5 +1,5 @@
 package service;
-import service.request.*;
+import request.ClearResult;
 
 public class ClearService {
 

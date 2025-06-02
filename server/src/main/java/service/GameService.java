@@ -2,12 +2,9 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.MemoryGameDAO;
 import dataaccess.MySQLGameDAO;
 import model.GameData;
-import service.request.*;
-
-import java.util.Objects;
+import request.*;
 
 public class GameService {
 

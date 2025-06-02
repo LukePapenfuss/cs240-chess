@@ -7,7 +7,7 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
-import service.request.*;
+import request.*;
 
 public class Client {
 

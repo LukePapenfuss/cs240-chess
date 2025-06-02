@@ -2,7 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 
-import service.request.*;
+import request.*;
 
 import java.io.*;
 import java.net.*;

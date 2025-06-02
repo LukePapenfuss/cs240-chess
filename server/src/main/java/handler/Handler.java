@@ -2,10 +2,8 @@ package handler;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import request.*;
 import service.*;
-import service.request.*;
-
-import java.util.ArrayList;
 
 public class Handler {
 

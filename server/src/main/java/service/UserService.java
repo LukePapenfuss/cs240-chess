@@ -1,10 +1,9 @@
 package service;
 import dataaccess.*;
 import org.mindrot.jbcrypt.BCrypt;
-import service.request.*;
+import request.*;
 import model.*;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
