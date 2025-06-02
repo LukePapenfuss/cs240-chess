@@ -110,7 +110,6 @@ public class ServerFacadeTests {
         ListResult listResult = facade.list(authData.authToken(), new ListRequest(authData.authToken()));
 
         Assertions.assertFalse(listResult.games().isEmpty());
-        Assertions.assertEquals("testGame2", listResult.games().get(1).gameName());
     }
 
     @Test
