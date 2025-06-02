@@ -148,7 +148,8 @@ public class Client {
             for (int i = 0; i < result.games().size(); ++i) {
                 GameData game = result.games().get(i);
 
-                str.append((i + 1)).append(". Game name: ").append(game.gameName()).append("\tWhite: ").append(game.whiteUsername()).append("\tBlack: ").append(game.blackUsername()).append("\n");
+                str.append((i + 1)).append(". Game name: ").append(game.gameName()).append("\tWhite: ")
+                        .append(game.whiteUsername()).append("\tBlack: ").append(game.blackUsername()).append("\n");
             }
 
             return str.toString();
