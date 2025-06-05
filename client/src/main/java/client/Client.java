@@ -170,6 +170,10 @@ public class Client {
             throw new ResponseException("Please choose team white or team black.");
         }
 
+        if (Integer.parseInt(params[0]) <= 0) {
+            throw new ResponseException("Please enter an integer value greater than 0");
+        }
+
         ChessGame.TeamColor color = params[1].equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         int gameInt = Integer.parseInt(params[0]);
 
@@ -202,6 +206,10 @@ public class Client {
             Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
             throw new ResponseException("Please enter an integer value.");
+        }
+
+        if (Integer.parseInt(params[0]) <= 0) {
+            throw new ResponseException("Please enter an integer value greater than 0");
         }
 
         int gameInt = Integer.parseInt(params[0]);
@@ -240,7 +248,7 @@ public class Client {
 
     // SHARED COMMANDS
 
-    public String quit() throws ResponseException { return "Quitting..."; }
+    public String quit() throws ResponseException { return "quit"; }
 
     public String help() {
         if (state == State.LOGGEDOUT) {
