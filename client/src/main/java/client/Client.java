@@ -7,6 +7,7 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
+import org.glassfish.grizzly.http.server.Response;
 import request.*;
 
 public class Client {
@@ -48,7 +49,11 @@ public class Client {
             } else {
                 // In game commands (Playing and Observing)
                 return switch (cmd) {
-                    case "exit" -> exit();
+                    case "redraw" -> redraw();
+                    case "leave" -> exit();
+                    case "resign" -> resign();
+                    case "move" -> move(params);
+                    case "highlight" -> highlight(params);
                     case "quit" -> quit();
                     default -> help();
                 };
@@ -240,6 +245,43 @@ public class Client {
 
     // IN GAME COMMANDS
 
+    public String redraw() throws ResponseException {
+        try {
+            return printGame(currentGameIndex, true);
+        } catch (ResponseException e) {
+            throw new ResponseException("Could not redraw the game.");
+        }
+    }
+
+    public String resign() throws ResponseException {
+        return "resign.";
+    }
+
+    public String move(String... params) throws ResponseException {
+        if (params.length == 2) {
+            String start = params[0];
+            String end = params[1];
+
+            // Move
+
+            return redraw(); // Add highlighted move
+        } else {
+            throw new ResponseException("Expected: move <start> <end>");
+        }
+    }
+
+    public String highlight(String... params) throws ResponseException {
+        if (params.length == 1) {
+            String tile = params[0];
+
+            // Highlight
+
+            return "highlight";
+        } else {
+            throw new ResponseException("Expected: highlight <tile>");
+        }
+    }
+
     public String exit() throws ResponseException {
         state = State.LOGGEDIN;
 
@@ -271,7 +313,11 @@ public class Client {
         }
         return """
                     - help
-                    - exit (the game)
+                    - redraw
+                    - resign
+                    - move <start> <end>
+                    - highlight <tile>
+                    - leave (the game)
                     - quit (the program)
                     """;
     }
