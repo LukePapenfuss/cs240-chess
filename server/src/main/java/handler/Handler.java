@@ -81,6 +81,18 @@ public class Handler {
         return json;
     }
 
+    public String updateGame(String request) throws DataAccessException {
+        var serializer = new Gson();
+
+        UpdateRequest updateRequest = serializer.fromJson(request, UpdateRequest.class);
+
+        gameService.updateGame(updateRequest);
+
+        String json = serializer.toJson(null);
+
+        return json;
+    }
+
     public String create(String request) throws DataAccessException {
         var serializer = new Gson();
 

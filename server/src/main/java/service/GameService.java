@@ -66,6 +66,28 @@ public class GameService {
         }
     }
 
+    public void updateGame(UpdateRequest updateRequest) throws DataAccessException {
+        if (updateRequest.game() == null || updateRequest.gameID() == 0) {
+            throw new DataAccessException("Error: bad request");
+        }
+
+        GameData game = gameDAO.getGame(updateRequest.gameID());
+
+        if (game == null) {
+            throw new DataAccessException("Error: bad request");
+        } else {
+            GameData updatedGame = new GameData(
+                    game.gameID(),
+                    game.whiteUsername(),
+                    game.blackUsername(),
+                    game.gameName(),
+                    updateRequest.game()
+            );
+
+            gameDAO.updateGame(updateRequest.gameID(), updatedGame);
+        }
+    }
+
     public ListResult list(ListRequest listRequest) throws DataAccessException {
         if (listRequest.authToken() == null) {
             throw new DataAccessException("Error: bad request");

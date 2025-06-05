@@ -29,6 +29,8 @@ public class Server {
 
         joinEndpoint();
 
+        updateEndpoint();
+
         clearEndpoint();
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -133,6 +135,24 @@ public class Server {
                 handler.authorize(req.headers("Authorization"));
 
                 String result = handler.join(req.headers("Authorization"), req.body());
+
+                res.type("application/json");
+                return result;
+            } catch (DataAccessException e) {
+                var serializer = new Gson();
+
+                res.status(convertErrorMessage(e));
+                return serializer.toJson(Map.of("message", e.getMessage()));
+            }
+        });
+    }
+
+    private void updateEndpoint() {
+        Spark.put("/update", (req, res) -> {
+            try {
+                handler.authorize(req.headers("Authorization"));
+
+                String result = handler.updateGame(req.body());
 
                 res.type("application/json");
                 return result;

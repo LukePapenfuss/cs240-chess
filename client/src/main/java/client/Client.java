@@ -2,10 +2,8 @@ package client;
 
 import java.util.Arrays;
 
-import chess.ChessGame;
+import chess.*;
 
-import chess.ChessPiece;
-import chess.ChessPosition;
 import model.GameData;
 import org.glassfish.grizzly.http.server.Response;
 import request.*;
@@ -17,6 +15,7 @@ public class Client {
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
     private int currentGameIndex = 0;
+    private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -199,6 +198,7 @@ public class Client {
 
             state = State.INGAME;
             currentGameIndex = gameInt;
+            teamColor = color;
 
             return printGame(gameInt, color == ChessGame.TeamColor.WHITE);
         } catch (ResponseException e) {
@@ -247,7 +247,7 @@ public class Client {
 
     public String redraw() throws ResponseException {
         try {
-            return printGame(currentGameIndex, true);
+            return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE);
         } catch (ResponseException e) {
             throw new ResponseException("Could not redraw the game.");
         }
@@ -258,15 +258,46 @@ public class Client {
     }
 
     public String move(String... params) throws ResponseException {
-        if (params.length == 2) {
+        if (params.length == 2 || params.length == 3) {
             String start = params[0];
             String end = params[1];
+            String promotion = params.length == 3 ? params[2] : null;
 
-            // Move
+            ListRequest listRequest = new ListRequest(visitorAuth);
+
+            ListResult listResult = server.list(visitorAuth, listRequest);
+
+            if (currentGameIndex > listResult.games().size()) {
+                throw new ResponseException("");
+            }
+
+            GameData gameData = listResult.games().get(currentGameIndex-1);
+
+            ChessPosition startPos;
+            ChessPosition endPos;
+
+            try {
+                startPos = new ChessPosition(start);
+                endPos = new ChessPosition(end);
+            } catch (InvalidMoveException e) {
+                throw new ResponseException(e.getMessage());
+            }
+
+            try {
+                if (gameData.game().getTeamTurn() != teamColor) {
+                    throw new InvalidMoveException("It isn't your turn.");
+                }
+
+                gameData.game().makeMove(new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion)));
+
+                server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
+            } catch (InvalidMoveException e) {
+                throw new ResponseException(e.getMessage());
+            }
 
             return redraw(); // Add highlighted move
         } else {
-            throw new ResponseException("Expected: move <start> <end>");
+            throw new ResponseException("Expected: move <start> <end> <promotion>");
         }
     }
 
@@ -377,4 +408,26 @@ public class Client {
         }
     }
 
+    private ChessPiece.PieceType convertToPieceType(String type) {
+        switch (type.toLowerCase()) {
+            case "king" -> {
+                return ChessPiece.PieceType.KING;
+            }
+            case "queen" -> {
+                return ChessPiece.PieceType.QUEEN;
+            }
+            case "rook" -> {
+                return ChessPiece.PieceType.ROOK;
+            }
+            case "bishop" -> {
+                return ChessPiece.PieceType.BISHOP;
+            }
+            case "knight" -> {
+                return ChessPiece.PieceType.KNIGHT;
+            }
+            default -> {
+                return ChessPiece.PieceType.PAWN;
+            }
+        }
+    }
 }

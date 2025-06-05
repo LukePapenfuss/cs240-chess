@@ -18,6 +18,18 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public ChessPosition(String notation) throws InvalidMoveException {
+        char file = notation.toLowerCase().charAt(0);
+        char rank = notation.charAt(1);
+
+        if (!Character.isAlphabetic(file) || !Character.isDigit(rank)) {
+            throw new InvalidMoveException("Incorrect move notation.");
+        }
+
+        this.row = Integer.parseInt(String.valueOf(rank));
+        this.col = "abcdefgh".indexOf(file) + 1;
+    }
+
     /**
      * Generates a hashCode for the chess position
      *
