@@ -17,6 +17,7 @@ public class Client {
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
     private int currentGameIndex = 0;
+    private boolean resigned = false;
     private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
     public Client(String serverUrl) {
@@ -47,8 +48,7 @@ public class Client {
                     case "quit" -> quit();
                     default -> help();
                 };
-            } else {
-                // In game commands (Playing and Observing)
+            } else if (state == State.INGAME) {
                 return switch (cmd) {
                     case "redraw" -> redraw();
                     case "leave" -> exit();
@@ -57,6 +57,12 @@ public class Client {
                     case "highlight" -> highlight(params);
                     case "quit" -> quit();
                     default -> help();
+                };
+            } else {
+                return switch (cmd) {
+                    case "yes" -> confirmResignation();
+                    case "no" -> unconfirmResignation();
+                    default -> "Please enter yes or no.";
                 };
             }
         } catch (ResponseException ex) {
@@ -256,10 +262,16 @@ public class Client {
     }
 
     public String resign() throws ResponseException {
-        return "resign.";
+        state = State.CONFIRMATION;
+
+        return "Are you sure you want to resign?";
     }
 
     public String move(String... params) throws ResponseException {
+        if (resigned) {
+            throw new ResponseException("The game is already over.");
+        }
+
         if (params.length == 2 || params.length == 3) {
             String start = params[0];
             String end = params[1];
@@ -356,6 +368,22 @@ public class Client {
     }
 
     public String getState() { return state.toString(); }
+
+    // CONFIRMATION COMMANDS
+
+    public String confirmResignation() throws ResponseException {
+        resigned = true;
+
+        state = State.INGAME;
+
+        return (teamColor == ChessGame.TeamColor.WHITE ? "White" : "Black") + " resigns.";
+    }
+
+    public String unconfirmResignation() throws ResponseException {
+        state = State.INGAME;
+
+        return "Returning to the game";
+    }
 
     // OTHER METHODS
 
