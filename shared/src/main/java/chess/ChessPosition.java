@@ -22,8 +22,8 @@ public class ChessPosition {
         char file = notation.toLowerCase().charAt(0);
         char rank = notation.charAt(1);
 
-        if (!Character.isAlphabetic(file) || !Character.isDigit(rank)) {
-            throw new InvalidMoveException("Incorrect move notation.");
+        if (!Character.isAlphabetic(file) || !Character.isDigit(rank) || "abcdefgh".indexOf(file) == -1) {
+            throw new InvalidMoveException("Incorrect chess notation.");
         }
 
         this.row = Integer.parseInt(String.valueOf(rank));
