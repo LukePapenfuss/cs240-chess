@@ -371,7 +371,7 @@ public class Client {
 
     // CONFIRMATION COMMANDS
 
-    public String confirmResignation() throws ResponseException {
+    public String confirmResignation() throws ResponseException     {
         resigned = true;
 
         state = State.INGAME;
