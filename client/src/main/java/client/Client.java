@@ -22,6 +22,7 @@ public class Client {
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
     private int currentGameIndex = 0;
+    private int currentGameID = 0;
     private boolean resigned = false;
     private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
@@ -213,6 +214,7 @@ public class Client {
 
             state = State.INGAME;
             currentGameIndex = gameInt;
+            currentGameID = gameID;
             teamColor = color;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
@@ -339,6 +341,11 @@ public class Client {
 
     public String exit() throws ResponseException {
         state = State.LOGGEDIN;
+
+        ws.leave(visitorUsername, currentGameID);
+        ws = null;
+        currentGameID = 0;
+        currentGameIndex = 0;
 
         return "Exited game.";
     }

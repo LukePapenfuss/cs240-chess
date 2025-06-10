@@ -32,7 +32,7 @@ public class WebSocketHandler {
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, command);
                 case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
-                case LEAVE -> leaveGame(session, username, command);
+                case LEAVE -> leaveGame(session, command);
                 case RESIGN -> resign(session, username, command);
             }
         } catch (UnauthorizedException ex) {
@@ -53,11 +53,11 @@ public class WebSocketHandler {
         connections.broadcast(command.getAuthToken(), notification);
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
-        connections.remove(username);
-        var message = String.format("%s left the game.", username);
+    private void leaveGame(Session session, UserGameCommand command) throws IOException {
+        connections.remove(command.getAuthToken());
+        var message = String.format("%s left the game.", command.getAuthToken());
         var notification = new NotificationMessage(message);
-        connections.broadcast(username, notification);
+        connections.broadcast(command.getAuthToken(), notification);
     }
 
     private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
