@@ -6,6 +6,8 @@ import java.util.Objects;
 
 import chess.*;
 
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import model.GameData;
 import org.glassfish.grizzly.http.server.Response;
 import request.*;
@@ -14,14 +16,17 @@ public class Client {
 
     private String visitorAuth = null;
     private final ServerFacade server;
+    private WebSocketFacade ws;
+    private final NotificationHandler notificationHandler;
     private final String serverUrl;
     private State state = State.LOGGEDOUT;
     private int currentGameIndex = 0;
     private boolean resigned = false;
     private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
-    public Client(String serverUrl) {
+    public Client(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
+        this.notificationHandler = notificationHandler;
         this.serverUrl = serverUrl;
     }
 
@@ -207,6 +212,9 @@ public class Client {
             state = State.INGAME;
             currentGameIndex = gameInt;
             teamColor = color;
+
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.connect(visitorAuth, gameID);
 
             return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null);
         } catch (ResponseException e) {

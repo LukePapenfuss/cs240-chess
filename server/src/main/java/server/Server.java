@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import handler.*;
+import server.websocket.WebSocketHandler;
 import spark.*;
 
 import java.util.Map;
@@ -10,11 +11,14 @@ import java.util.Map;
 public class Server {
 
     private Handler handler = new Handler();
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Run All Endpoints
         registerEndpoint();
@@ -180,7 +184,6 @@ public class Server {
             }
         });
     }
-
 
     private int convertErrorMessage(DataAccessException e) {
         int err = 500;

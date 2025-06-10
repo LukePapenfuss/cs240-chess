@@ -1,0 +1,76 @@
+package server.websocket;
+
+import client.ResponseException;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
+import websocket.messages.*;
+
+import java.io.IOException;
+import java.util.Timer;
+
+
+@WebSocket
+public class WebSocketHandler {
+
+    private final ConnectionManager connections = new ConnectionManager();
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) {
+        try {
+            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+
+            String username = command.getAuthToken();
+
+            // saveSession(command.getGameID, session);
+
+            switch (command.getCommandType()) {
+                case CONNECT -> connect(session, command);
+                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
+                case LEAVE -> leaveGame(session, username, command);
+                case RESIGN -> resign(session, username, command);
+            }
+        } catch (UnauthorizedException ex) {
+            sendMessage(session.getRemote(), "Error: unauthorized");
+        } catch (Exception ex) {
+            sendMessage(session.getRemote(), "Error: " + ex.getMessage());
+        }
+    }
+
+    private void sendMessage(RemoteEndpoint remote, String message) {
+
+    }
+
+    private void connect(Session session, UserGameCommand command) throws IOException {
+        connections.add(command.getAuthToken(), session);
+        var message = String.format("%s has joined the game.", command.getAuthToken());
+        var notification = new NotificationMessage(NotificationMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(command.getAuthToken(), notification);
+    }
+
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
+        connections.remove(username);
+        var message = String.format("%s left the game.", username);
+        var notification = new NotificationMessage(NotificationMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(username, notification);
+    }
+
+    private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
+        connections.remove(username);
+        var message = String.format("%s left the game.", username);
+        var notification = new NotificationMessage(NotificationMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(username, notification);
+    }
+
+    private void resign(Session session, String username, UserGameCommand command) throws IOException {
+        connections.remove(username);
+        var message = String.format("%s left the game.", username);
+        var notification = new NotificationMessage(NotificationMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(username, notification);
+    }
+}
