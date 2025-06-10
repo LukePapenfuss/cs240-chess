@@ -16,7 +16,6 @@ public class WebSocketFacade extends Endpoint {
     Session session;
     NotificationHandler notificationHandler;
 
-
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
