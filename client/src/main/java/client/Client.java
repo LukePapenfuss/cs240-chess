@@ -15,6 +15,7 @@ import request.*;
 public class Client {
 
     private String visitorAuth = null;
+    private String visitorUsername = null;
     private final ServerFacade server;
     private WebSocketFacade ws;
     private final NotificationHandler notificationHandler;
@@ -116,6 +117,7 @@ public class Client {
                 state = State.LOGGEDIN;
 
                 visitorAuth = result.authToken();
+                visitorUsername = result.username();
 
                 return String.format("You are logged in as %s.", result.username());
 
@@ -214,7 +216,7 @@ public class Client {
             teamColor = color;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorAuth, gameID);
+            ws.connect(visitorUsername, gameID);
 
             return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null);
         } catch (ResponseException e) {
