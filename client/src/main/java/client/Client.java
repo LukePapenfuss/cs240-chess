@@ -220,7 +220,7 @@ public class Client {
             ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.connect(visitorUsername, gameID);
 
-            return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null);
+            return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null, null);
         } catch (ResponseException e) {
             throw new ResponseException("Could not join game.");
         }
@@ -240,7 +240,7 @@ public class Client {
         int gameInt = Integer.parseInt(params[0]);
 
         try {
-            return printGame(gameInt, true, null);
+            return printGame(gameInt, true, null, null);
         } catch (ResponseException e) {
             throw new ResponseException("Could not observe game.");
         }
@@ -267,7 +267,7 @@ public class Client {
 
     public String redraw() throws ResponseException {
         try {
-            return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null);
+            return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null, null);
         } catch (ResponseException e) {
             throw new ResponseException("Could not redraw the game.");
         }
@@ -309,22 +309,23 @@ public class Client {
                 throw new ResponseException(e.getMessage());
             }
 
+            ChessMove move = new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion));
+
             try {
                 if (gameData.game().getTeamTurn() != teamColor) {
                     throw new InvalidMoveException("It isn't your turn.");
                 }
 
-                ChessMove move = new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion));
                 gameData.game().makeMove(move);
 
-                ws.makeMove(visitorUsername, currentGameID, move);
-
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
+
+                ws.makeMove(visitorUsername, currentGameID, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move));
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
 
-            return redraw(); // Add highlighted move
+            return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null, move); // Add highlighted move
         } else {
             throw new ResponseException("Expected: move <start> <end> <promotion>");
         }
@@ -333,7 +334,7 @@ public class Client {
     public String highlight(String... params) throws ResponseException {
         if (params.length == 1) {
             try {
-                return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, params[0]);
+                return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, params[0], null);
             } catch (ResponseException e) {
                 throw new ResponseException("Could not highlight the piece.");
             }
@@ -407,7 +408,7 @@ public class Client {
 
     // OTHER METHODS
 
-    private String printGame(int gameIndex, boolean playAsWhite, String highlightedTile) throws ResponseException {
+    private String printGame(int gameIndex, boolean playAsWhite, String highlightedTile, ChessMove move) throws ResponseException {
         ListRequest listRequest = new ListRequest(visitorAuth);
 
         try {
@@ -429,7 +430,7 @@ public class Client {
             ArrayList<ChessMove> validMoves = new ArrayList<>();
 
             try {
-                if (highlightedTile != null ) {
+                if (highlightedTile != null) {
                     validMoves = (ArrayList<ChessMove>) game.validMoves(new ChessPosition(highlightedTile));
                 }
             } catch (InvalidMoveException e) {
@@ -444,26 +445,28 @@ public class Client {
                 str += defaultColor + "\u2003" + (playAsWhite ? 8 - i : i + 1) + " ";
                 for (int j = 0; j < 8; ++j) {
 
-                    ChessPiece piece = game.getBoard().getPiece(new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j));
+                    ChessPosition pos = new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j);
+
+                    ChessPiece piece = game.getBoard().getPiece(pos);
 
                     boolean isValid = false;
                     for (int k = 0; k < validMoves.size(); ++k) {
-                        if (Objects.equals(validMoves.get(k).getEndPosition(), new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j))) {
+                        if (Objects.equals(validMoves.get(k).getEndPosition(), pos)) {
                             isValid = true;
                         }
                     }
 
-                    if (highlightedTile == null || !isValid) {
-                        if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                            str += ((i + j) % 2 == 0) ? whiteOnDark : whiteOnLight;
-                        } else {
-                            str += ((i + j) % 2 == 0) ? blackOnDark : blackOnLight;
-                        }
-                    } else {
+                    if ((highlightedTile != null && isValid) || (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
                         if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                             str += whiteOnValid;
                         } else {
                             str += blackOnValid;
+                        }
+                    } else {
+                        if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                            str += ((i + j) % 2 == 0) ? whiteOnDark : whiteOnLight;
+                        } else {
+                            str += ((i + j) % 2 == 0) ? blackOnDark : blackOnLight;
                         }
                     }
 
