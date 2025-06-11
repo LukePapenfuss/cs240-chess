@@ -179,6 +179,10 @@ public class Client {
     }
 
     public String join(String... params) throws ResponseException {
+        if (params.length != 2) {
+            throw new ResponseException("Expected: join <id> [WHITE|BLACK]");
+        }
+
         try {
             Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
@@ -289,7 +293,7 @@ public class Client {
             ListResult listResult = server.list(visitorAuth, listRequest);
 
             if (currentGameIndex > listResult.games().size()) {
-                throw new ResponseException("");
+                throw new ResponseException("Couldn't find the game.");
             }
 
             GameData gameData = listResult.games().get(currentGameIndex-1);
@@ -305,7 +309,7 @@ public class Client {
                 startPos = new ChessPosition(start);
                 endPos = new ChessPosition(end);
             } catch (InvalidMoveException e) {
-                throw new ResponseException(e.getMessage());
+                throw new ResponseException("Invalid move notation.");
             }
 
             ChessMove move = new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion));
@@ -319,7 +323,7 @@ public class Client {
 
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
-                ws.makeMove(visitorUsername, currentGameID, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move));
+                ws.makeMove(visitorUsername, currentGameID, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
@@ -410,7 +414,7 @@ public class Client {
 
         server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
-        return (teamColor == ChessGame.TeamColor.WHITE ? "White" : "Black") + " resigns.";
+        return "You resigned.";
     }
 
     public String unconfirmResignation() throws ResponseException {

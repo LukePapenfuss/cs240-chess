@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessGame;
 import client.ResponseException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -67,6 +68,27 @@ public class WebSocketHandler {
 
         String game = command.getBoard();
         connections.broadcast(username, new LoadGameMessage("\n" + game));
+
+        if (command.getGame().game().isInCheckmate(command.getGame().game().getTeamTurn())) {
+
+            String checkmateMessage = (command.getGame().game().getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in checkmate.";
+
+            connections.broadcast(username, new NotificationMessage(checkmateMessage));
+            sendMessage(session.getRemote(), checkmateMessage);
+
+            command.getGame().game().finishGame();
+
+        } else if (command.getGame().game().isInCheck(command.getGame().game().getTeamTurn())) {
+
+            String checkMessage = (command.getGame().game().getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in check.";
+
+            connections.broadcast(username, new NotificationMessage(checkMessage));
+            sendMessage(session.getRemote(), checkMessage);
+
+        }
+
     }
 
     private void resign(Session session, String username, UserGameCommand command) throws IOException {
