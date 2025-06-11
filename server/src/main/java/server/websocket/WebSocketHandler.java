@@ -61,17 +61,16 @@ public class WebSocketHandler {
     }
 
     private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
-//        var message = String.format("%s made the move: " + command.getMove().toString(), username);
-//        var notification = new NotificationMessage(message);
-//        connections.broadcast(username, notification);
+        var message = String.format("%s made the move: " + command.getMove().toString(), username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(username, notification);
 
         String game = command.getBoard();
         connections.broadcast(username, new LoadGameMessage("\n" + game));
     }
 
     private void resign(Session session, String username, UserGameCommand command) throws IOException {
-        connections.remove(username);
-        var message = String.format("%s left the game.", username);
+        var message = String.format("%s has resigned!", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification);
     }

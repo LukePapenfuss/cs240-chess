@@ -23,7 +23,6 @@ public class Client {
     private State state = State.LOGGEDOUT;
     private int currentGameIndex = 0;
     private int currentGameID = 0;
-    private boolean resigned = false;
     private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
     public Client(String serverUrl, NotificationHandler notificationHandler) {
@@ -280,10 +279,6 @@ public class Client {
     }
 
     public String move(String... params) throws ResponseException {
-        if (resigned) {
-            throw new ResponseException("The game is already over.");
-        }
-
         if (params.length == 2 || params.length == 3) {
             String start = params[0];
             String end = params[1];
@@ -298,6 +293,10 @@ public class Client {
             }
 
             GameData gameData = listResult.games().get(currentGameIndex-1);
+
+            if (gameData.game().isFinished()) {
+                throw new ResponseException("The game is already over.");
+            }
 
             ChessPosition startPos;
             ChessPosition endPos;
@@ -393,9 +392,23 @@ public class Client {
     // CONFIRMATION COMMANDS
 
     public String confirmResignation() throws ResponseException     {
-        resigned = true;
-
         state = State.INGAME;
+
+        ws.resign(visitorUsername, currentGameID);
+
+        ListRequest listRequest = new ListRequest(visitorAuth);
+
+        ListResult listResult = server.list(visitorAuth, listRequest);
+
+        if (currentGameIndex > listResult.games().size()) {
+            throw new ResponseException("Game not found.");
+        }
+
+        GameData gameData = listResult.games().get(currentGameIndex-1);
+
+        gameData.game().finishGame();
+
+        server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
         return (teamColor == ChessGame.TeamColor.WHITE ? "White" : "Black") + " resigns.";
     }

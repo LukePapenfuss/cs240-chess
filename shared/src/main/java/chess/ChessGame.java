@@ -14,10 +14,13 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor teamTurn;
+    private boolean finished;
 
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
+
+        finished = false;
 
         teamTurn = TeamColor.WHITE;
     }
@@ -309,5 +312,13 @@ public class ChessGame {
         }
 
         return false;
+    }
+
+    public void finishGame() {
+        finished = true;
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 }
