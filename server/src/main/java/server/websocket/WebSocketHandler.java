@@ -31,7 +31,7 @@ public class WebSocketHandler {
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, command);
-                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
+                case MAKE_MOVE -> makeMove(session, username, new Gson().fromJson(message, MakeMoveCommand.class));
                 case LEAVE -> leaveGame(session, command);
                 case RESIGN -> resign(session, username, command);
             }
@@ -61,8 +61,7 @@ public class WebSocketHandler {
     }
 
     private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
-        connections.remove(username);
-        var message = String.format("%s left the game.", username);
+        var message = String.format("%s made the move: " + command.getMove().toString(), username);
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification);
     }

@@ -314,7 +314,10 @@ public class Client {
                     throw new InvalidMoveException("It isn't your turn.");
                 }
 
-                gameData.game().makeMove(new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion)));
+                ChessMove move = new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion));
+                gameData.game().makeMove(move);
+
+                ws.makeMove(visitorUsername, currentGameID, move);
 
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
             } catch (InvalidMoveException e) {

@@ -1,7 +1,7 @@
 package client;
 
 import client.websocket.NotificationHandler;
-import websocket.messages.NotificationMessage;
+import websocket.messages.*;
 
 import java.util.Scanner;
 
@@ -38,8 +38,21 @@ public class Repl implements NotificationHandler {
     }
 
     @Override
-    public void notify(NotificationMessage notification) {
-        System.out.println(notification.getMessage());
+    public void notify(ServerMessage notification) {
+        switch (notification.getServerMessageType()) {
+            case NOTIFICATION:
+                NotificationMessage note = (NotificationMessage) notification;
+                System.out.println(note.getMessage());
+                break;
+            case LOAD_GAME:
+                LoadGameMessage game = (LoadGameMessage) notification;
+                System.out.println(game.getGame());
+                break;
+            case ERROR:
+                ErrorMessage error = (ErrorMessage) notification;
+                System.out.println(error.getMessage());
+                break;
+        }
         printPrompt();
     }
 }
