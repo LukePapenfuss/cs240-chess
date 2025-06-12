@@ -2,8 +2,6 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.InvalidMoveException;
-import client.ResponseException;
-import client.ServerFacade;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.GameData;
@@ -24,11 +22,9 @@ public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
     private Server server;
-    private final ServerFacade serverFacade;
 
     public WebSocketHandler(Server server) {
         this.server = server;
-        serverFacade = new ServerFacade("http://localhost:8080");
     }
 
     @OnWebSocketMessage
@@ -72,19 +68,11 @@ public class WebSocketHandler {
             GameData gameData = server.getGame(command.getGameID(), command.getAuthToken());
 
             if (Objects.equals(gameData.whiteUsername(), username)) {
-                try {
-                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), null, gameData.blackUsername()));
-                } catch (ResponseException e) {
-                    System.out.println("Couldn't update game");
-                }
+                server.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), null, gameData.blackUsername()));
             }
 
             if (Objects.equals(gameData.blackUsername(), username)) {
-                try {
-                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), null));
-                } catch (ResponseException e) {
-                    System.out.println("Couldn't update game");
-                }
+                server.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), null));
             }
 
             connections.remove(command.getAuthToken());
@@ -109,11 +97,7 @@ public class WebSocketHandler {
                 try {
                     game.makeMove(command.getMove());
 
-                    try {
-                        serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(game, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
-                    } catch (ResponseException e) {
-                        throw new InvalidMoveException("Error: invalid move");
-                    }
+                    server.updateGame(command.getAuthToken(), new UpdateRequest(game, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
 
                     if (game.isFinished()) { throw new InvalidMoveException("Error: invalid move"); }
 
@@ -170,11 +154,7 @@ public class WebSocketHandler {
 
                 gameData.game().finishGame();
 
-                try {
-                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
-                } catch (ResponseException e) {
-                    System.out.println("Could not update game.");
-                }
+                server.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
 
             } else {
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: cannot resign")));

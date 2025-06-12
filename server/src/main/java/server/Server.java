@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import handler.*;
 import model.GameData;
 import request.LoginResult;
+import request.UpdateRequest;
 import server.websocket.WebSocketHandler;
 import spark.*;
 
@@ -204,6 +205,10 @@ public class Server {
 
     public int gameCount(String authToken) throws DataAccessException {
         return handler.gameCount(authToken);
+    }
+
+    public void updateGame(String authToken, UpdateRequest updateRequest) throws DataAccessException {
+        handler.updateGame(updateRequest);
     }
 
     private void clearEndpoint() {

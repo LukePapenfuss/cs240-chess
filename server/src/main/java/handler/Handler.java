@@ -110,6 +110,10 @@ public class Handler {
         return json;
     }
 
+    public void updateGame(UpdateRequest updateRequest) throws DataAccessException {
+        gameService.updateGame(updateRequest);
+    }
+
     public String create(String request) throws DataAccessException {
         var serializer = new Gson();
 
