@@ -3,6 +3,7 @@ package client.websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import client.ResponseException;
+import client.ServerFacade;
 import com.google.gson.Gson;
 import model.GameData;
 import websocket.commands.*;
@@ -57,18 +58,18 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(String username, int gameID, ChessGame.TeamColor color) throws ResponseException {
+    public void connect(String authToken, int gameID, ChessGame.TeamColor color) throws ResponseException {
         try {
-            var command = new ConnectCommand(username, gameID, color);
+            var command = new ConnectCommand(authToken, gameID, color);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new ResponseException(ex.getMessage());
         }
     }
 
-    public void leave(String username, int gameID) throws ResponseException {
+    public void leave(String authToken, int gameID) throws ResponseException {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, username, gameID);
+            var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new ResponseException(ex.getMessage());
@@ -84,9 +85,9 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void resign(String username, int gameID) throws ResponseException {
+    public void resign(String authToken, int gameID) throws ResponseException {
         try {
-            var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, username, gameID);
+            var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new ResponseException(ex.getMessage());

@@ -88,8 +88,8 @@ public class UserService {
         // No return value
     }
 
-    public boolean authorize(String authToken) throws DataAccessException {
-        return authDAO.getAuth(authToken) != null;
+    public String authorize(String authToken) throws DataAccessException {
+        return getUsername(authToken);
     }
 
     public String getUsername(String authToken) throws DataAccessException {

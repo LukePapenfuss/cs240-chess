@@ -229,7 +229,7 @@ public class Client {
             teamColor = color;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorUsername, currentGameIndex, teamColor);
+            ws.connect(visitorAuth, currentGameIndex > listResult.games().size()-1 ? 0 : currentGameIndex, teamColor);
 
             return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null, null);
         } catch (ResponseException e) {
@@ -266,7 +266,7 @@ public class Client {
             teamColor = ChessGame.TeamColor.WHITE;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorUsername, currentGameIndex, null);
+            ws.connect(visitorAuth, currentGameIndex, null);
 
             return printGame(gameInt, true, null, null);
         } catch (ResponseException e) {
@@ -348,7 +348,7 @@ public class Client {
 
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
-                ws.makeMove(visitorUsername, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
+                ws.makeMove(visitorAuth, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
@@ -374,7 +374,7 @@ public class Client {
     public String exit() throws ResponseException {
         state = State.LOGGEDIN;
 
-        ws.leave(visitorUsername, currentGameID);
+        ws.leave(visitorAuth, currentGameID);
         ws = null;
         currentGameID = 0;
         currentGameIndex = 0;
@@ -430,7 +430,7 @@ public class Client {
     public String confirmResignation() throws ResponseException     {
         state = State.INGAME;
 
-        ws.resign(visitorUsername, currentGameID);
+        ws.resign(visitorAuth, currentGameID);
 
         ListRequest listRequest = new ListRequest(visitorAuth);
 

@@ -49,9 +49,9 @@ public class Handler {
         return json;
     }
 
-    public boolean authorize(String request) throws DataAccessException {
-        if (userService.authorize(request)) {
-            return true;
+    public String authorize(String request) throws DataAccessException {
+        if(userService.authorize(request) != null) {
+            return userService.authorize(request);
         }
 
         throw new DataAccessException("Error: unauthorized");

@@ -55,6 +55,11 @@ public class ServerFacade {
         this.makeRequest("PUT", path, updateRequest, null, authToken);
     }
 
+    public LoginResult authorize(String authToken) throws ResponseException {
+        var path = "/auth";
+        return this.makeRequest("GET", path, new AuthorizeRequest(authToken), LoginResult.class, authToken);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();

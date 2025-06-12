@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import handler.*;
+import request.LoginResult;
 import server.websocket.WebSocketHandler;
 import spark.*;
 
@@ -11,7 +12,7 @@ import java.util.Map;
 public class Server {
 
     private Handler handler = new Handler();
-    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler(this);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -34,6 +35,8 @@ public class Server {
         joinEndpoint();
 
         updateEndpoint();
+
+        authorizeEndpoint();
 
         clearEndpoint();
 
@@ -167,6 +170,30 @@ public class Server {
                 return serializer.toJson(Map.of("message", e.getMessage()));
             }
         });
+    }
+
+    private void authorizeEndpoint() {
+        Spark.get("/auth", (req, res) -> {
+            try {
+                String username = handler.authorize(req.headers("Authorization"));
+
+                LoginResult loginResult = new LoginResult(username, req.headers("Authorization"));
+
+                String json = new Gson().toJson(loginResult);
+
+                res.type("application/json");
+                return json;
+            } catch (DataAccessException e) {
+                var serializer = new Gson();
+
+                res.status(convertErrorMessage(e));
+                return serializer.toJson(Map.of("message", e.getMessage()));
+            }
+        });
+    }
+
+    public String authorize(String authToken) throws DataAccessException {
+        return handler.authorize(authToken);
     }
 
     private void clearEndpoint() {

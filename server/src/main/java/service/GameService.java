@@ -23,7 +23,9 @@ public class GameService {
             throw new DataAccessException("Error: bad request");
         }
 
-        int gameID = (int) Math.floor(Math.random()*100000000);
+        ListResult listResult = new ListResult(gameDAO.listGames());
+
+        int gameID = listResult.games().size()+1;
 
         GameData newGame = new GameData(gameID, null, null, createRequest.gameName(), new ChessGame());
 
@@ -35,7 +37,7 @@ public class GameService {
     }
 
     public JoinResult join(String username, JoinRequest joinRequest) throws DataAccessException {
-        if (username == null || joinRequest.playerColor() == null || !(joinRequest.gameID() > 10)) {
+        if (username == null || joinRequest.playerColor() == null || !(joinRequest.gameID() > 0)) {
             throw new DataAccessException("Error: bad request");
         }
 
