@@ -15,7 +15,7 @@ public class Connection {
         this.gameID = gameID;
     }
 
-    public void send(String msg) throws IOException {
+    public synchronized void send(String msg) throws IOException {
         session.getRemote().sendString(msg);
     }
 }

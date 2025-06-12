@@ -217,9 +217,9 @@ public class Client {
             teamColor = color;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorAuth, currentGameIndex > listResult.games().size()-1 ? 0 : currentGameIndex, teamColor);
+            ws.connect(visitorAuth, currentGameIndex > listResult.games().size() ? 0 : currentGameIndex, teamColor);
 
-            return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null, null);
+            return "";
         } catch (ResponseException e) {
             throw new ResponseException("Could not join game.");
         }
@@ -253,7 +253,7 @@ public class Client {
             teamColor = ChessGame.TeamColor.WHITE;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorAuth, currentGameIndex > listResult.games().size()-1 ? 0 : currentGameIndex, null);
+            ws.connect(visitorAuth, currentGameIndex > listResult.games().size() ? 0 : currentGameIndex, null);
 
             return printGame(gameInt, true, null, null);
         } catch (ResponseException e) {
@@ -322,7 +322,7 @@ public class Client {
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
-            return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null, move); // Add highlighted move
+            return ""; // Add highlighted move
         } else {
             throw new ResponseException("Expected: move <start> <end> <promotion>");
         }
@@ -406,7 +406,7 @@ public class Client {
     // OTHER METHODS
     public String printGame(int gameIndex, boolean playAsWhite, String highlightedTile, ChessMove move) throws ResponseException {
         ListRequest listRequest = new ListRequest(visitorAuth);
-        if (move != null) { playAsWhite = teamColor == ChessGame.TeamColor.WHITE; }
+        playAsWhite = teamColor == ChessGame.TeamColor.WHITE;
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
             if (gameIndex > listResult.games().size()) {
@@ -446,9 +446,9 @@ public class Client {
                             (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
                         str += (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whiteOnValid : blackOnValid);
                     } else {
-                        str += ((i + j) % 2 == 0) ?
-                                ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? whiteOnDark : whiteOnLight) :
-                                ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? blackOnDark : blackOnLight);
+                        str += ((i+j) % 2 == 0) ?
+                                (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whiteOnDark : blackOnDark) :
+                                (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whiteOnLight : blackOnLight);
                     }
                     str += " ";
                     if(piece != null) {

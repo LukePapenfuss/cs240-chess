@@ -23,8 +23,9 @@ public class ConnectionManager {
     public void broadcast(String excludeVisitorName, ServerMessage notification, int gameID) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
+            System.out.println("Broadcast loop: " + c.visitorName + " gameID=" + c.gameID);
             if (c.session.isOpen()) {
-                if (gameID == c.gameID && !c.visitorName.equals(excludeVisitorName)) {
+                if (!c.visitorName.equals(excludeVisitorName) && gameID == c.gameID) {
                     c.send(new Gson().toJson(notification));
                 }
             } else {
