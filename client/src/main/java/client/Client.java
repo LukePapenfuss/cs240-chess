@@ -427,7 +427,7 @@ public class Client {
 
     // CONFIRMATION COMMANDS
 
-    public String confirmResignation() throws ResponseException     {
+    public String confirmResignation() throws ResponseException {
         state = State.INGAME;
 
         ws.resign(visitorAuth, currentGameID);
@@ -440,13 +440,7 @@ public class Client {
             throw new ResponseException("Game not found.");
         }
 
-        GameData gameData = listResult.games().get(currentGameIndex-1);
-
-        gameData.game().finishGame();
-
-        server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
-
-        return "You resigned.";
+        return "";
     }
 
     public String unconfirmResignation() throws ResponseException {

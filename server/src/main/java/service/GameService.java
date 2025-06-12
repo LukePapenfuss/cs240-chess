@@ -80,8 +80,8 @@ public class GameService {
         } else {
             GameData updatedGame = new GameData(
                     game.gameID(),
-                    game.whiteUsername(),
-                    game.blackUsername(),
+                    updateRequest.whiteUsername(),
+                    updateRequest.blackUsername(),
                     game.gameName(),
                     updateRequest.game()
             );

@@ -24,7 +24,7 @@ public class ConnectionManager {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {//gameID == c.gameID &&
+                if (gameID == c.gameID && !c.visitorName.equals(excludeVisitorName)) {
                     c.send(new Gson().toJson(notification));
                 }
             } else {

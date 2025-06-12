@@ -68,10 +68,32 @@ public class WebSocketHandler {
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
-        connections.remove(command.getAuthToken());
-        var message = String.format("%s left the game.", username);
-        var notification = new NotificationMessage(message);
-        connections.broadcast(command.getAuthToken(), notification, command.getGameID());
+        try {
+            GameData gameData = server.getGame(command.getGameID(), command.getAuthToken());
+
+            if (Objects.equals(gameData.whiteUsername(), username)) {
+                try {
+                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), null, gameData.blackUsername()));
+                } catch (ResponseException e) {
+                    System.out.println("Couldn't update game");
+                }
+            }
+
+            if (Objects.equals(gameData.blackUsername(), username)) {
+                try {
+                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), null));
+                } catch (ResponseException e) {
+                    System.out.println("Couldn't update game");
+                }
+            }
+
+            connections.remove(command.getAuthToken());
+            var message = String.format("%s left the game.", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(command.getAuthToken(), notification, command.getGameID());
+        } catch (DataAccessException e) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: game not found")));
+        }
     }
 
     private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
@@ -88,17 +110,17 @@ public class WebSocketHandler {
                     game.makeMove(command.getMove());
 
                     try {
-                        serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(game, gameData.gameID()));
-                        System.out.println("Updated Game");
+                        serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(game, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
                     } catch (ResponseException e) {
-                        System.out.println("Error: Couldn't update game");
+                        throw new InvalidMoveException("Error: invalid move");
                     }
+
+                    if (game.isFinished()) { throw new InvalidMoveException("Error: invalid move"); }
 
                     var message = String.format("%s made the move: " + command.getMove().toString(), username);
                     var notification = new NotificationMessage(message);
                     connections.broadcast(command.getAuthToken(), notification, command.getGameID());
 
-                    System.out.println("Broadcast:\n" + game.getBoard().toString());
                     connections.broadcast(null, new LoadGameMessage(command.getGameID(), command.getMove()), command.getGameID());
 
                     if (game.isInCheckmate(game.getTeamTurn())) {
@@ -138,8 +160,28 @@ public class WebSocketHandler {
     }
 
     private void resign(Session session, String username, UserGameCommand command) throws IOException {
-        var message = String.format("%s has resigned!", username);
-        var notification = new NotificationMessage(message);
-        connections.broadcast(command.getAuthToken(), notification, command.getGameID());
+        try {
+            GameData gameData = server.getGame(command.getGameID(), command.getAuthToken());
+
+            if (!gameData.game().isFinished() && (Objects.equals(gameData.blackUsername(), username) || Objects.equals(gameData.whiteUsername(), username))) {
+                var message = String.format("%s has resigned!", username);
+                var notification = new NotificationMessage(message);
+                connections.broadcast(null, notification, command.getGameID());
+
+                gameData.game().finishGame();
+
+                try {
+                    serverFacade.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
+                } catch (ResponseException e) {
+                    System.out.println("Could not update game.");
+                }
+
+            } else {
+                session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: cannot resign")));
+            }
+
+        } catch (DataAccessException e) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: game not found")));
+        }
     }
 }
