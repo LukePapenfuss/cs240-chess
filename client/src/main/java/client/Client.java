@@ -446,8 +446,9 @@ public class Client {
                             (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
                         str += (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whiteOnValid : blackOnValid);
                     } else {
-                        str += ((i + j) % 2 == 0) ? ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? whiteOnDark : whiteOnLight) :
-                            ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? blackOnDark : blackOnLight);
+                        str += ((i + j) % 2 == 0) ?
+                                ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? whiteOnDark : whiteOnLight) :
+                                ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? blackOnDark : blackOnLight);
                     }
                     str += " ";
                     if(piece != null) {
