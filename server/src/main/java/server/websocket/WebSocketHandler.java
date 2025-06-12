@@ -1,20 +1,16 @@
 package server.websocket;
 
 import chess.ChessGame;
-import client.ResponseException;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.sun.source.tree.WhileLoopTree;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import websocket.messages.*;
 
 import java.io.IOException;
-import java.util.Timer;
-
 
 @WebSocket
 public class WebSocketHandler {
@@ -28,10 +24,8 @@ public class WebSocketHandler {
 
             String username = command.getAuthToken();
 
-            // saveSession(command.getGameID, session);
-
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, command);
+                case CONNECT -> connect(session, new Gson().fromJson(message, ConnectCommand.class));
                 case MAKE_MOVE -> makeMove(session, username, new Gson().fromJson(message, MakeMoveCommand.class));
                 case LEAVE -> leaveGame(session, command);
                 case RESIGN -> resign(session, username, command);
@@ -47,9 +41,10 @@ public class WebSocketHandler {
         remote.sendString(new Gson().toJson(new ErrorMessage(message)));
     }
 
-    private void connect(Session session, UserGameCommand command) throws IOException {
+    private void connect(Session session, ConnectCommand command) throws IOException {
         connections.add(command.getAuthToken(), session);
-        var message = String.format("%s has joined the game.", command.getAuthToken());
+        var message = command.getColor() != null ? String.format("%s has joined the game as " + (command.getColor() == ChessGame.TeamColor.WHITE ? "white." : "black."),
+                command.getAuthToken()) : String.format("%s is observing.", command.getAuthToken());
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getAuthToken(), notification);
     }
@@ -66,26 +61,31 @@ public class WebSocketHandler {
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification);
 
-        String game = command.getBoard();
-        connections.broadcast(username, new LoadGameMessage("\n" + game));
+        ChessGame game = command.getGame().game();
+        connections.broadcast(username, new LoadGameMessage(command.getGameID(), command.getMove()));
 
-        if (command.getGame().game().isInCheckmate(command.getGame().game().getTeamTurn())) {
+        if (game.isInCheckmate(game.getTeamTurn())) {
 
-            String checkmateMessage = (command.getGame().game().getTeamTurn() == ChessGame.TeamColor.WHITE ?
+            String checkmateMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
                     command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in checkmate.";
 
-            connections.broadcast(username, new NotificationMessage(checkmateMessage));
-            sendMessage(session.getRemote(), checkmateMessage);
+            connections.broadcast(null, new NotificationMessage(checkmateMessage));
 
             command.getGame().game().finishGame();
 
-        } else if (command.getGame().game().isInCheck(command.getGame().game().getTeamTurn())) {
+        } else if (game.isInCheck(game.getTeamTurn())) {
 
-            String checkMessage = (command.getGame().game().getTeamTurn() == ChessGame.TeamColor.WHITE ?
+            String checkMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
                     command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in check.";
 
-            connections.broadcast(username, new NotificationMessage(checkMessage));
-            sendMessage(session.getRemote(), checkMessage);
+            connections.broadcast(null, new NotificationMessage(checkMessage));
+
+        } else if (game.isInStalemate(game.getTeamTurn())) {
+
+            String staleMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in stalemate.";
+
+            connections.broadcast(null, new NotificationMessage(staleMessage));
 
         }
 

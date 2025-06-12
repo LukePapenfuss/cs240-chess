@@ -46,7 +46,12 @@ public class Repl implements NotificationHandler {
                 break;
             case LOAD_GAME:
                 LoadGameMessage game = (LoadGameMessage) notification;
-                System.out.println(game.getGame());
+
+                try {
+                    System.out.println("\n" + client.printGame(game.getGame(), true, null, game.getMove()));
+                } catch (ResponseException e) {
+                    System.out.println(e.getMessage());
+                }
                 break;
             case ERROR:
                 ErrorMessage error = (ErrorMessage) notification;

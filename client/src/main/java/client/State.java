@@ -4,5 +4,5 @@ public enum State {
     LOGGEDOUT,
     LOGGEDIN,
     INGAME,
-    CONFIRMATION
+    OBSERVING, CONFIRMATION
 }

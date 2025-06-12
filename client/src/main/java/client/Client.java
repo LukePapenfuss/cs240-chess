@@ -64,6 +64,13 @@ public class Client {
                     case "quit" -> quit();
                     default -> help();
                 };
+            } else if (state == State.OBSERVING) {
+                return switch (cmd) {
+                    case "redraw" -> redraw();
+                    case "leave" -> exit();
+                    case "quit" -> quit();
+                    default -> help();
+                };
             } else {
                 return switch (cmd) {
                     case "yes" -> confirmResignation();
@@ -221,7 +228,7 @@ public class Client {
             teamColor = color;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorUsername, gameID);
+            ws.connect(visitorUsername, currentGameIndex, teamColor);
 
             return printGame(gameInt, color == ChessGame.TeamColor.WHITE, null, null);
         } catch (ResponseException e) {
@@ -241,8 +248,25 @@ public class Client {
         }
 
         int gameInt = Integer.parseInt(params[0]);
+        ListRequest listRequest = new ListRequest(visitorAuth);
 
         try {
+            ListResult listResult = server.list(visitorAuth, listRequest);
+
+            if (gameInt > listResult.games().size()) {
+                throw new ResponseException("");
+            }
+
+            int gameID = listResult.games().get(gameInt-1).gameID();
+
+            state = State.OBSERVING;
+            currentGameIndex = gameInt;
+            currentGameID = gameID;
+            teamColor = ChessGame.TeamColor.WHITE;
+
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.connect(visitorUsername, currentGameIndex, null);
+
             return printGame(gameInt, true, null, null);
         } catch (ResponseException e) {
             throw new ResponseException("Could not observe game.");
@@ -323,7 +347,7 @@ public class Client {
 
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
-                ws.makeMove(visitorUsername, currentGameID, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
+                ws.makeMove(visitorUsername, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
@@ -379,6 +403,13 @@ public class Client {
                     - observe <id>
                     - quit
                     """;
+        } else if (state == State.OBSERVING) {
+            return """
+                    - help
+                    - redraw
+                    - leave (the game)
+                    - quit (the program)
+                    """;
         }
         return """
                     - help
@@ -425,14 +456,16 @@ public class Client {
 
     // OTHER METHODS
 
-    private String printGame(int gameIndex, boolean playAsWhite, String highlightedTile, ChessMove move) throws ResponseException {
+    public String printGame(int gameIndex, boolean playAsWhite, String highlightedTile, ChessMove move) throws ResponseException {
         ListRequest listRequest = new ListRequest(visitorAuth);
+
+        if (move != null) { playAsWhite = teamColor == ChessGame.TeamColor.WHITE; }
 
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
 
             if (gameIndex > listResult.games().size()) {
-                throw new ResponseException("");
+                throw new ResponseException("Game: " + gameIndex + " not found in " + listResult.games().size() + " games.");
             }
 
             String defaultColor = "\u001b[39;49m";
@@ -501,7 +534,7 @@ public class Client {
 
             return str;
         } catch (ResponseException e) {
-            throw new ResponseException("Could not display game.");
+            throw new ResponseException(e.getMessage());
         }
     }
 
