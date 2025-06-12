@@ -99,6 +99,7 @@ public class Client {
                 state = State.LOGGEDIN;
 
                 visitorAuth = result.authToken();
+                visitorUsername = result.username();
 
                 return String.format("You are now registered and logged in as %s.", result.username());
 
