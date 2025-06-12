@@ -56,7 +56,8 @@ public class WebSocketHandler {
 
     private void connect(Session session, String username, ConnectCommand command) throws IOException {
         connections.add(command.getAuthToken(), session, command.getGameID());
-        var message = command.getColor() != null ? String.format("%s has joined the game as " + (command.getColor() == ChessGame.TeamColor.WHITE ? "white." : "black."),
+        var message = command.getColor() != null ?
+                String.format("%s has joined the game as " + (command.getColor() == ChessGame.TeamColor.WHITE ? "white." : "black."),
                 username) : String.format("%s is observing.", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getAuthToken(), notification, command.getGameID());
@@ -97,7 +98,8 @@ public class WebSocketHandler {
                 try {
                     game.makeMove(command.getMove());
 
-                    server.updateGame(command.getAuthToken(), new UpdateRequest(game, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
+                    server.updateGame(command.getAuthToken(),
+                            new UpdateRequest(game, gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
 
                     if (game.isFinished()) { throw new InvalidMoveException("Error: invalid move"); }
 
@@ -147,14 +149,16 @@ public class WebSocketHandler {
         try {
             GameData gameData = server.getGame(command.getGameID(), command.getAuthToken());
 
-            if (!gameData.game().isFinished() && (Objects.equals(gameData.blackUsername(), username) || Objects.equals(gameData.whiteUsername(), username))) {
+            if (!gameData.game().isFinished() && (Objects.equals(gameData.blackUsername(), username) ||
+                    Objects.equals(gameData.whiteUsername(), username))) {
                 var message = String.format("%s has resigned!", username);
                 var notification = new NotificationMessage(message);
                 connections.broadcast(null, notification, command.getGameID());
 
                 gameData.game().finishGame();
 
-                server.updateGame(command.getAuthToken(), new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
+                server.updateGame(command.getAuthToken(),
+                        new UpdateRequest(gameData.game(), gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername()));
 
             } else {
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: cannot resign")));

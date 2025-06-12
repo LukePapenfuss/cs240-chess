@@ -297,7 +297,6 @@ public class Client {
             String promotion = params.length == 3 ? params[2] : null;
             ListRequest listRequest = new ListRequest(visitorAuth);
             ListResult listResult = server.list(visitorAuth, listRequest);
-
             if (currentGameIndex > listResult.games().size()) {
                 throw new ResponseException("Couldn't find the game.");
             }
@@ -341,12 +340,10 @@ public class Client {
     }
     public String exit() throws ResponseException {
         state = State.LOGGEDIN;
-
         ws.leave(visitorAuth, currentGameID);
         ws = null;
         currentGameID = 0;
         currentGameIndex = 0;
-
         return "Exited game.";
     }
 
@@ -431,7 +428,9 @@ public class Client {
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
-            if (highlightedTile != null && (validMoves == null || validMoves.isEmpty())) { throw new ResponseException("The piece on " + highlightedTile + " has no legal move."); }
+            if (highlightedTile != null && (validMoves == null || validMoves.isEmpty())) {
+                throw new ResponseException("The piece on " + highlightedTile + " has no legal move.");
+            }
             String str = defaultColor + (playAsWhite ? " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n" :
                     " \u2003 \u2003h \u2003g \u2003f \u2003e \u2003d \u2003c \u2003b \u2003a  \n");
             for (int i = 0; i < 8; ++i) {
@@ -441,22 +440,14 @@ public class Client {
                     ChessPiece piece = game.getBoard().getPiece(pos);
                     boolean isValid = false;
                     for (int k = 0; k < validMoves.size(); ++k) {
-                        if (Objects.equals(validMoves.get(k).getEndPosition(), pos)) {
-                            isValid = true;
-                        }
+                        isValid = isValid || Objects.equals(validMoves.get(k).getEndPosition(), pos);
                     }
-                    if ((highlightedTile != null && isValid) || (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
-                        if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                            str += whiteOnValid;
-                        } else {
-                            str += blackOnValid;
-                        }
+                    if ((highlightedTile != null && isValid) ||
+                            (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
+                        str += (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whiteOnValid : blackOnValid);
                     } else {
-                        if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                            str += ((i + j) % 2 == 0) ? whiteOnDark : whiteOnLight;
-                        } else {
-                            str += ((i + j) % 2 == 0) ? blackOnDark : blackOnLight;
-                        }
+                        str += ((i + j) % 2 == 0) ? ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? whiteOnDark : whiteOnLight) :
+                            ((piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? blackOnDark : blackOnLight);
                     }
                     str += " ";
                     if(piece != null) {
