@@ -68,6 +68,7 @@ public class Client {
                 return switch (cmd) {
                     case "redraw" -> redraw();
                     case "leave" -> exit();
+                    case "highlight" -> highlight(params);
                     case "quit" -> quit();
                     default -> help();
                 };
@@ -255,7 +256,7 @@ public class Client {
             ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.connect(visitorAuth, currentGameIndex > listResult.games().size() ? 0 : currentGameIndex, null);
 
-            return printGame(gameInt, true, null, null);
+            return "";
         } catch (ResponseException e) {
             throw new ResponseException("Could not observe game.");
         }
@@ -371,6 +372,7 @@ public class Client {
             return """
                     - help
                     - redraw
+                    - highlight <tile>
                     - leave (the game)
                     - quit (the program)
                     """;
