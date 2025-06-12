@@ -84,7 +84,6 @@ public class Client {
     }
 
     // LOGGED OUT COMMANDS
-
     public String register(String... params) throws ResponseException {
         if (params.length == 3) {
             String username = params[0];
@@ -111,35 +110,26 @@ public class Client {
             throw new ResponseException("Expected: register <username> <password> <email>");
         }
     }
-
     public String login(String... params) throws ResponseException {
         if (params.length == 2) {
             String username = params[0];
             String password = params[1];
-
             LoginRequest loginRequest = new LoginRequest(username, password);
-
             try {
                 LoginResult result = server.login(loginRequest);
-
                 state = State.LOGGEDIN;
-
                 visitorAuth = result.authToken();
                 visitorUsername = result.username();
-
                 return String.format("You are logged in as %s.", result.username());
-
             } catch (ResponseException e) {
                 throw new ResponseException("Invalid Credentials");
             }
-
         } else {
             throw new ResponseException("Expected: login <username> <password>");
         }
     }
 
     // LOGGED IN COMMANDS
-
     public String create(String... params) throws ResponseException {
         if (params.length == 1) {
             String gameName = params[0];
@@ -159,7 +149,6 @@ public class Client {
             throw new ResponseException("Expected: create <name>");
         }
     }
-
     public String list() throws ResponseException {
         ListRequest request = new ListRequest(visitorAuth);
 
@@ -185,7 +174,6 @@ public class Client {
         }
 
     }
-
     public String join(String... params) throws ResponseException {
         if (params.length != 2) {
             throw new ResponseException("Expected: join <id> [WHITE|BLACK]");
@@ -236,7 +224,6 @@ public class Client {
             throw new ResponseException("Could not join game.");
         }
     }
-
     public String observe(String... params) throws ResponseException {
         try {
             Integer.parseInt(params[0]);
@@ -273,7 +260,6 @@ public class Client {
             throw new ResponseException("Could not observe game.");
         }
     }
-
     public String logout() throws ResponseException {
         try {
             LogoutRequest request = new LogoutRequest(visitorAuth);
@@ -292,7 +278,6 @@ public class Client {
     }
 
     // IN GAME COMMANDS
-
     public String redraw() throws ResponseException {
         try {
             return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null, null);
@@ -300,65 +285,49 @@ public class Client {
             throw new ResponseException("Could not redraw the game.");
         }
     }
-
     public String resign() throws ResponseException {
         state = State.CONFIRMATION;
 
         return "Are you sure you want to resign?";
     }
-
     public String move(String... params) throws ResponseException {
         if (params.length == 2 || params.length == 3) {
             String start = params[0];
             String end = params[1];
             String promotion = params.length == 3 ? params[2] : null;
-
             ListRequest listRequest = new ListRequest(visitorAuth);
-
             ListResult listResult = server.list(visitorAuth, listRequest);
 
             if (currentGameIndex > listResult.games().size()) {
                 throw new ResponseException("Couldn't find the game.");
             }
-
             GameData gameData = listResult.games().get(currentGameIndex-1);
-
             if (gameData.game().isFinished()) {
                 throw new ResponseException("The game is already over.");
             }
-
             ChessPosition startPos;
             ChessPosition endPos;
-
             try {
                 startPos = new ChessPosition(start);
                 endPos = new ChessPosition(end);
             } catch (InvalidMoveException e) {
                 throw new ResponseException("Invalid move notation.");
             }
-
             ChessMove move = new ChessMove(startPos, endPos, promotion == null ? null : convertToPieceType(promotion));
-
             try {
                 if (gameData.game().getTeamTurn() != teamColor) {
                     throw new InvalidMoveException("It isn't your turn.");
                 }
-
                 gameData.game().makeMove(move);
-
                 ws.makeMove(visitorAuth, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move));
-
-                // server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
-
             return printGame(currentGameIndex, teamColor == ChessGame.TeamColor.WHITE, null, move); // Add highlighted move
         } else {
             throw new ResponseException("Expected: move <start> <end> <promotion>");
         }
     }
-
     public String highlight(String... params) throws ResponseException {
         if (params.length == 1) {
             try {
@@ -370,7 +339,6 @@ public class Client {
             throw new ResponseException("Expected: highlight <tile>");
         }
     }
-
     public String exit() throws ResponseException {
         state = State.LOGGEDIN;
 
@@ -383,9 +351,7 @@ public class Client {
     }
 
     // SHARED COMMANDS
-
     public String quit() throws ResponseException { return "quit"; }
-
     public String help() {
         if (state == State.LOGGEDOUT) {
             return """
@@ -422,47 +388,33 @@ public class Client {
                     - quit (the program)
                     """;
     }
-
     public String getState() { return state.toString(); }
 
     // CONFIRMATION COMMANDS
-
     public String confirmResignation() throws ResponseException {
         state = State.INGAME;
-
         ws.resign(visitorAuth, currentGameID);
-
         ListRequest listRequest = new ListRequest(visitorAuth);
-
         ListResult listResult = server.list(visitorAuth, listRequest);
-
         if (currentGameIndex > listResult.games().size()) {
             throw new ResponseException("Game not found.");
         }
-
         return "";
     }
-
     public String unconfirmResignation() throws ResponseException {
         state = State.INGAME;
-
         return "Returning to the game";
     }
 
     // OTHER METHODS
-
     public String printGame(int gameIndex, boolean playAsWhite, String highlightedTile, ChessMove move) throws ResponseException {
         ListRequest listRequest = new ListRequest(visitorAuth);
-
         if (move != null) { playAsWhite = teamColor == ChessGame.TeamColor.WHITE; }
-
         try {
             ListResult listResult = server.list(visitorAuth, listRequest);
-
             if (gameIndex > listResult.games().size()) {
                 throw new ResponseException("Game: " + gameIndex + " not found in " + listResult.games().size() + " games.");
             }
-
             String defaultColor = "\u001b[39;49m";
             String whiteOnDark = "\u001b[39;47m";
             String whiteOnLight = "\u001b[39;100m";
@@ -470,10 +422,8 @@ public class Client {
             String blackOnLight = "\u001b[30;100m";
             String whiteOnValid = "\u001b[39;43m";
             String blackOnValid = "\u001b[30;43m";
-
             ChessGame game = listResult.games().get(gameIndex-1).game();
             ArrayList<ChessMove> validMoves = new ArrayList<>();
-
             try {
                 if (highlightedTile != null) {
                     validMoves = (ArrayList<ChessMove>) game.validMoves(new ChessPosition(highlightedTile));
@@ -482,25 +432,19 @@ public class Client {
                 throw new ResponseException(e.getMessage());
             }
             if (highlightedTile != null && (validMoves == null || validMoves.isEmpty())) { throw new ResponseException("The piece on " + highlightedTile + " has no legal move."); }
-
             String str = defaultColor + (playAsWhite ? " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n" :
                     " \u2003 \u2003h \u2003g \u2003f \u2003e \u2003d \u2003c \u2003b \u2003a  \n");
-
             for (int i = 0; i < 8; ++i) {
                 str += defaultColor + "\u2003" + (playAsWhite ? 8 - i : i + 1) + " ";
                 for (int j = 0; j < 8; ++j) {
-
                     ChessPosition pos = new ChessPosition(playAsWhite ? 8-i : i+1, playAsWhite ? j+1 : 8-j);
-
                     ChessPiece piece = game.getBoard().getPiece(pos);
-
                     boolean isValid = false;
                     for (int k = 0; k < validMoves.size(); ++k) {
                         if (Objects.equals(validMoves.get(k).getEndPosition(), pos)) {
                             isValid = true;
                         }
                     }
-
                     if ((highlightedTile != null && isValid) || (move != null && (move.getEndPosition().equals(pos) || move.getStartPosition().equals(pos)))) {
                         if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                             str += whiteOnValid;
@@ -514,7 +458,6 @@ public class Client {
                             str += ((i + j) % 2 == 0) ? blackOnDark : blackOnLight;
                         }
                     }
-
                     str += " ";
                     if(piece != null) {
                         str += piece.toSymbol();
@@ -523,16 +466,13 @@ public class Client {
                 }
                 str += defaultColor + "\u2003" + (playAsWhite ? 8 - i : i + 1) + " \n";
             }
-
             str += defaultColor + (playAsWhite ? " \u2003 \u2003a \u2003b \u2003c \u2003d \u2003e \u2003f \u2003g \u2003h  \n" :
                     " \u2003 \u2003h \u2003g \u2003f \u2003e \u2003d \u2003c \u2003b \u2003a  \n");
-
             return str;
         } catch (ResponseException e) {
             throw new ResponseException(e.getMessage());
         }
     }
-
     private ChessPiece.PieceType convertToPieceType(String type) {
         switch (type.toLowerCase()) {
             case "king" -> {
