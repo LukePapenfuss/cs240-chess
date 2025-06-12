@@ -3,6 +3,7 @@ package server.websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -30,7 +31,6 @@ public class WebSocketHandler {
 
             String username = "";
             try {
-                System.out.println("TRY: " + command.getAuthToken());
                 username = server.authorize(command.getAuthToken());
             } catch (DataAccessException e) {
                 throw new UnauthorizedException("unauthorized");
@@ -74,29 +74,37 @@ public class WebSocketHandler {
         var notification = new NotificationMessage(message);
         connections.broadcast(command.getAuthToken(), notification);
 
-        ChessGame game = command.getGame().game();
+        GameData gameData;
+        try {
+            gameData = server.getGame(command.getGameID(), command.getAuthToken());
+        } catch (DataAccessException e) {
+            throw new IOException("ERROR");
+        }
+
+        ChessGame game = gameData.game();
+
         connections.broadcast(command.getAuthToken(), new LoadGameMessage(command.getGameID(), command.getMove()));
 
         if (game.isInCheckmate(game.getTeamTurn())) {
 
             String checkmateMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
-                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in checkmate.";
+                    gameData.whiteUsername() : gameData.blackUsername()) + " is in checkmate.";
 
             connections.broadcast(null, new NotificationMessage(checkmateMessage));
 
-            command.getGame().game().finishGame();
+            game.finishGame();
 
         } else if (game.isInCheck(game.getTeamTurn())) {
 
             String checkMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
-                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in check.";
+                    gameData.whiteUsername() : gameData.blackUsername()) + " is in check.";
 
             connections.broadcast(null, new NotificationMessage(checkMessage));
 
         } else if (game.isInStalemate(game.getTeamTurn())) {
 
             String staleMessage = (game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
-                    command.getGame().whiteUsername() : command.getGame().blackUsername()) + " is in stalemate.";
+                    gameData.whiteUsername() : gameData.blackUsername()) + " is in stalemate.";
 
             connections.broadcast(null, new NotificationMessage(staleMessage));
 

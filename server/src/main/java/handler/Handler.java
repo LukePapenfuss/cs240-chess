@@ -2,6 +2,7 @@ package handler;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import model.GameData;
 import request.*;
 import service.*;
 
@@ -67,6 +68,14 @@ public class Handler {
         String json = serializer.toJson(listResult);
 
         return json;
+    }
+
+    public GameData getGame(int gameID, String authToken) throws DataAccessException {
+        ListRequest listRequest = new ListRequest(authToken);
+
+        ListResult listResult = gameService.list(listRequest);
+
+        return listResult.games().get(gameID-1);
     }
 
     public String join(String authToken, String request) throws DataAccessException {

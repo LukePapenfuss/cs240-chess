@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import handler.*;
+import model.GameData;
 import request.LoginResult;
 import server.websocket.WebSocketHandler;
 import spark.*;
@@ -194,6 +195,10 @@ public class Server {
 
     public String authorize(String authToken) throws DataAccessException {
         return handler.authorize(authToken);
+    }
+
+    public GameData getGame(int gameID, String authToken) throws DataAccessException {
+        return handler.getGame(gameID, authToken);
     }
 
     private void clearEndpoint() {

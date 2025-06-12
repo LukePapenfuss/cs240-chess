@@ -348,7 +348,7 @@ public class Client {
 
                 server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
 
-                ws.makeMove(visitorAuth, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move), gameData);
+                ws.makeMove(visitorAuth, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move));
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
