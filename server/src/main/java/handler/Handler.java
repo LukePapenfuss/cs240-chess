@@ -78,6 +78,14 @@ public class Handler {
         return listResult.games().get(gameID-1);
     }
 
+    public int gameCount(String authToken) throws DataAccessException {
+        ListRequest listRequest = new ListRequest(authToken);
+
+        ListResult listResult = gameService.list(listRequest);
+
+        return listResult.games().size();
+    }
+
     public String join(String authToken, String request) throws DataAccessException {
         var serializer = new Gson();
 

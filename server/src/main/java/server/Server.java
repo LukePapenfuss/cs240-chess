@@ -14,6 +14,7 @@ public class Server {
 
     private Handler handler = new Handler();
     private final WebSocketHandler webSocketHandler = new WebSocketHandler(this);
+    private String authToken;
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -199,6 +200,10 @@ public class Server {
 
     public GameData getGame(int gameID, String authToken) throws DataAccessException {
         return handler.getGame(gameID, authToken);
+    }
+
+    public int gameCount(String authToken) throws DataAccessException {
+        return handler.gameCount(authToken);
     }
 
     private void clearEndpoint() {

@@ -266,7 +266,7 @@ public class Client {
             teamColor = ChessGame.TeamColor.WHITE;
 
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.connect(visitorAuth, currentGameIndex, null);
+            ws.connect(visitorAuth, currentGameIndex > listResult.games().size()-1 ? 0 : currentGameIndex, null);
 
             return printGame(gameInt, true, null, null);
         } catch (ResponseException e) {
@@ -346,9 +346,9 @@ public class Client {
 
                 gameData.game().makeMove(move);
 
-                server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
-
                 ws.makeMove(visitorAuth, currentGameIndex, move, printGame(currentGameIndex, teamColor != ChessGame.TeamColor.WHITE, null, move));
+
+                // server.updateGame(visitorAuth, new UpdateRequest(gameData.game(), gameData.gameID()));
             } catch (InvalidMoveException e) {
                 throw new ResponseException(e.getMessage());
             }
